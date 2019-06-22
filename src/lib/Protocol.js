@@ -33,6 +33,10 @@ const _MessageType = {
 //
 
 class __Protocol {
+  constructor (data) {
+    if (data) this.data = data
+  }
+
   __defaults__ () {
     this.packetType = String
     this.messageType = Number
