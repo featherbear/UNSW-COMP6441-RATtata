@@ -62,21 +62,21 @@ __Protocol.create = function (...args) {
 
 class _Connection extends __Protocol {
   constructor () {
-    super()
+    super(...arguments)
     this.packetType = _PacketType.Connection
   }
 }
 
 class _Control extends __Protocol {
   constructor () {
-    super()
+    super(...arguments)
     this.packetType = _PacketType.Control
   }
 }
 
 class _Data extends __Protocol {
   constructor () {
-    super()
+    super(...arguments)
     this.packetType = _PacketType.Data
   }
 }
@@ -87,91 +87,91 @@ let Packets = {}
 
 Packets.KeepAlive = class KeepAlive extends _Connection {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.KeepAlive
   }
 }
 
 Packets.Hello = class Hello extends _Connection {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Hello
   }
 }
 
 Packets.List = class List extends _Connection {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.List
   }
 }
 
 Packets.Poll = class Poll extends _Connection {
   constructor () {
-    super()
+    super(...arguments)
     this.messabgeType = _MessageType.Poll
   }
 }
 
 Packets.DisplaySetup = class DisplaySetup extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.DisplaySetup
   }
 }
 
 Packets.Screenshot = class Screenshot extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Screenshot
   }
 }
 
 Packets.ControlSetup = class ControlSetup extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.ControlSetup
   }
 }
 
 Packets.Control = class Control extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Control
   }
 }
 
 Packets.KeylogSetup = class KeylogSetup extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.KeylogSetup
   }
 }
 
 Packets.WebcamSetup = class WebcamSetup extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.WebcamSetup
   }
 }
 
 Packets.Restart = class Restart extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Restart
   }
 }
 
 Packets.Shutdown = class Shutdown extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Shutdown
   }
 }
 
 Packets.Lock = class Lock extends _Control {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.Lock
   }
 }
@@ -180,27 +180,27 @@ Packets.Lock = class Lock extends _Control {
 
 Packets.r_Hello = class r_Hello extends _Data {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.r_Hello
   }
 }
 Packets.r_List = class r_List extends _Data {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.r_List
   }
 }
 
 Packets.r_Display = class r_Display extends _Data {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.r_Display
   }
 }
 
 Packets.r_Screenshot = class r_Screenshot extends _Data {
   constructor () {
-    super()
+    super(...arguments)
     this.messageType = _MessageType.r_Screenshot
   }
 }
