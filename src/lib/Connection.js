@@ -1,3 +1,6 @@
+// Universal transport layer protocol built on stream buffers
+
+
 const int24 = require("int24");
 
 class PayloadUtils {
@@ -28,8 +31,6 @@ class PayloadUtils {
 
     // Number of bytes required to store the payload size
     if (payload.length >= 16777216 /* Math.pow(2,3*8) */) {
-      console.log("Crafting extended payload");
-
       payloadSize.fill(0);
 
       let extendedPayloadSize = Buffer.allocUnsafe(4);
@@ -37,10 +38,8 @@ class PayloadUtils {
 
       payloadSize = Buffer.concat([payloadSize, extendedPayloadSize]);
     } else {
-      console.log("Crafting standard payload");
       int24.writeUInt24LE(payloadSize, 0, payload.length);
     }
-    console.log(payloadSize);
 
     this._writerFn(Buffer.concat([payloadSize, payload]));
   }
@@ -90,29 +89,18 @@ class PayloadUtils {
   }
 }
 
-// **For payloads up to 65535 bytes**
-// ```
-// |   2 bytes   | n bytes |
-// | length (LE) | payload |
-// ```
-
-// **For payloads greater than 65535 bytes**
-// ```
-// |   2 bytes   |         1 byte         |   m bytes   | n bytes |
-// |  0x00 0x00  | length of length bytes | length (LE) | payload |
-// ```
-
 function ConnectionClient(clientClass) {
   class ConnectionClient extends clientClass {
     connect(port, host, callback) {
       function callbackWrapper() {
-        this.__write__ = this.write.bind(this);
+        this._payloadUtils_ = new PayloadUtils(
+          this,
+          this,
+          this.write.bind(this)
+        );
 
-        this._packetUtils_ = new PayloadUtils(this, this, this.__write__);
-        // this._packetUtils_.read;
-
-        this.write = (...args) => this._packetUtils_.write(...args);
-        // this.on("data", this._packetUtils_.read);
+        this.write = (...args) => this._payloadUtils_.write(...args);
+        this.on("data", this._payloadUtils_.read.bind(this._payloadUtils_));
 
         callback && callback.bind(this)();
       }
@@ -130,9 +118,18 @@ function ConnectionServer(serverClass) {
       super(...arguments);
 
       this.on("connection", function(socket) {
-        this._packetUtils_ = new PayloadUtils(this, socket, this.write);
-        this.write = (...args) => this._packetUtils_.write(...args);
-        socket.on("data", this._packetUtils_.read.bind(this._packetUtils_));
+        socket._payloadUtils_ = new PayloadUtils(
+          this,
+          socket,
+          socket.write.bind(socket)
+        );
+        socket.write = (...args) => {
+          socket._payloadUtils_.write(...args);
+        };
+        socket.on(
+          "data",
+          socket._payloadUtils_.read.bind(socket._payloadUtils_)
+        );
       });
     }
   }
