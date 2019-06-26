@@ -1,7 +1,7 @@
-const EventEmitter = require('./lib/EventEmitter')
-var net = require('net')
-const { Packets, PacketParser } = require('./lib/Protocol')
-const { ConnectionClient } = require('./lib/Connection')
+const net = require("net");
+const { EventEmitter } = require("events");
+const { Packets, PacketParser } = require("./lib/Protocol");
+const { ConnectionClient } = require("./lib/Connection");
 
 class Client {
   constructor () {

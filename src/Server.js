@@ -1,6 +1,6 @@
 let net = require("net");
 const dgram = require("dgram");
-const EventEmitter = require("./lib/EventEmitter");
+const { EventEmitter } = require("events");
 const { Packets, PacketParser } = require("./lib/Protocol");
 const { ConnectionServer } = require("./lib/Connection");
 
