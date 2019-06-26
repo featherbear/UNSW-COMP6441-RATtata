@@ -26,17 +26,12 @@ class Server {
 
         console.log("A new connection has been established.");
 
-        // socket.on('data', (...data) => {
-        //   console.log("Got data");
-        //   // self._onRaw(...data, socket)
-        // })
+        socket.on("payload", (...data) => {
+          self._onPayload(...data, socket);
+        });
 
         socket.on("end", function() {
           console.log("Closing connection with the client");
-        });
-
-        socket.on("TEST", function() {
-          console.log("SOCKET EVT");
         });
 
         // Don't forget to catch error, for your own sake.
@@ -47,8 +42,8 @@ class Server {
 
       this._TCPserver = TCPserver;
       TCPserver.on("TEST", function() {
-        console.log("SERVER EVT")
-      })
+        console.log("SERVER EVT");
+      });
     }
     // {
     //   let UDPserver = dgram.createSocket('udp4')
@@ -72,26 +67,26 @@ class Server {
     // }
   }
 
-  _onRaw(rawData, socket) {
-    function parseRawData(rawData) {
-      console.log(rawData);
+  _onPayload(payload, socket) {
+    function parseRawData(payload) {
+      console.log(payload);
       let rawPacket;
 
       try {
-        console.info(rawData.toString());
-        rawPacket = JSON.parse(rawData.toString());
+        console.info(payload.toString());
+        rawPacket = JSON.parse(payload.toString());
       } catch (e) {
-        throw Error("Data could not be parsed");
+        throw Error("Packet could not be parsed");
       }
 
       return PacketParser(rawPacket);
     }
 
     try {
-      let packet = parseRawData(rawData);
+      let packet = parseRawData(payload);
       this._onPacket(packet, socket);
     } catch (e) {
-      console.log("Error", e);
+      // If the parse fails, just drop the payload
     }
   }
 
