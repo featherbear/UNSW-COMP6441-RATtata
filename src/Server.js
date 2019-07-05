@@ -8,21 +8,25 @@ class Server {
   constructor(password) {
     let self = this;
 
+    this._UDPport = 41234;
+    this._TCPport = 41233;
+
     this.password = password;
     this._eventEmitter = new EventEmitter();
+    this.__authAttemptInterval__ = 1 * 1000;
+    this.__maxAuthAttempts__ = 4;
 
     {
       let TCPserver = new (ConnectionServer(net.Server))();
 
-      TCPserver.listen(1337, "127.0.0.1", function() {
+      TCPserver.listen(this._TCPport, "127.0.0.1", function() {
         const address = this.address();
         console.log(`TCP server listening ${address.address}:${address.port}`);
       });
 
       TCPserver.on("connection", function(socket) {
-        this.__authAttemptInterval__ = 3 * 1000;
-        this.__lastAuthenticationAttempt__ = 0;
-        this.__authenticationAttemptCount__ = 0;
+        socket.__lastAuthenticationAttempt__ = 0;
+        socket.__authenticationAttemptCount__ = 0;
 
         console.log("A new connection has been established.");
 
@@ -104,13 +108,26 @@ class Server {
       }
 
       if (packet.data === this.password) {
-        console.log("AUTH SUCCESS");
+        socket.write(
+          Packets.r_Hello.create({
+            status: true,
+            udp_port: this._UDPport
+          })
+        );
         socket.__userAuthenticated__ = true;
       } else {
-        console.log("BAD AUTH");
+        socket.write(
+          Packets.r_Hello.create({
+            status: false,
+            attempts:
+              this.__maxAuthAttempts__ - ++socket.__authenticationAttemptCount__
+          })
+        );
         socket.__lastAuthenticationAttempt__ = new Date();
 
-        if (++socket.__authenticationAttemptCount__ === 3) {
+        if (
+          socket.__authenticationAttemptCount__ === this.__maxAuthAttempts__
+        ) {
           console.log("BAD AUTH - LIMIT REACHED: KICK");
           socket.destroy();
         }

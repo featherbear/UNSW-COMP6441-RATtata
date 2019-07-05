@@ -1,6 +1,5 @@
 // Universal transport layer protocol built on stream buffers
 
-
 const int24 = require("int24");
 
 class PayloadUtils {
@@ -20,6 +19,7 @@ class PayloadUtils {
   }
 
   write(packet) {
+    console.debug("<SEND<", packet);
     let payload = Buffer.from(packet.toString());
 
     if (payload.length > 4294967296) {
