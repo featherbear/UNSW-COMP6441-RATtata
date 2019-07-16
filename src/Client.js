@@ -49,7 +49,7 @@ class Client {
   }
 
   _onPacket (packet) {
-    console.log('>RECV>', packet)
+    // console.log('>RECV>', packet)
 
     if (packet.constructor === Packets.r_Hello) {
       let data = packet.data

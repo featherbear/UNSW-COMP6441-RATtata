@@ -88,13 +88,11 @@ class Server {
   }
 
   _onPacket (packet, socket) {
-    // console.debug('>RECV>', packet)
-
-    if (socket._isUDP) {
-      console.debug('>RECV_UDP>', packet)
-    } else {
-      console.debug('>RECV_TCP>', packet)
-    }
+    // if (socket._isUDP) {
+    //   console.debug('>RECV_UDP>', packet)
+    // } else {
+    //   console.debug('>RECV_TCP>', packet)
+    // }
     
     let connectionPair = null
 
