@@ -66,6 +66,11 @@ class Client {
           this.__keepAliveLoop__ = setInterval(() => {
             this._UDPclient.write(Packets.KeepAlive.create(), '127.0.0.1', data.udp_port, false)
           }, 3000)
+
+          if (this.__onAuth) {
+            this.__onAuth();
+            this.__onAuth = null;
+          }
         } else {
           console.log(`Authentication fail - ${data.attempts} attempts left!`)
         }
@@ -77,7 +82,8 @@ class Client {
     }
   }
 
-  connect (port, host, password) {
+  connect (port, host, password, connectCallback) {
+    if (connectCallback) this.__onAuth = connectCallback;
     this.__isAuthenticated__ = false
     this._TCPclient.connect(port, host, () => this.login(password))
   }
@@ -93,4 +99,8 @@ class Client {
 }
 
 var client = new Client()
-client.connect(41233, '127.0.0.1', 'Hello123')
+client.connect(41233, '127.0.0.1', 'Hello123', function(){
+
+console.log("Authenticated!");
+
+})
