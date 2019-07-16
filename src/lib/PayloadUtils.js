@@ -17,7 +17,7 @@ class PayloadUtils {
   }
 
   write (packet, ...args) {
-    console.debug('<SEND<', packet)
+    // console.debug('<SEND<', packet)
     let payload = Buffer.from(packet.toString())
 
     if (payload.length > 4294967296) {
