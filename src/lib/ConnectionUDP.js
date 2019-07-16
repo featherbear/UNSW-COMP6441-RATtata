@@ -5,36 +5,67 @@ let UDPsocket = dgram.Socket
 class ConnectionUDPClient extends UDPsocket {
   constructor () {
     super('udp4', ...arguments)
+
+    this._payloadUtils_ = new PayloadUtils(
+      this,
+      this,
+      (data, host, port) => {
+        this.send(data, 0, data.length, port, host)
+      }
+    )
   }
 
   write (data, host, port) {
-    if (!this._payloadUtils_) {
-      this._payloadUtils_ = new PayloadUtils(
-        this,
-        this,
-        (data, host, port) => {
-          this.send(data, 0, data.length, port, host)
-        }
-      )
-    }
-
-    this.write = (...args) => this._payloadUtils_.write(...args)
-    this.write(data, host, port)
+    this._payloadUtils_.write(data, host, port)
   }
 }
+
+const { EventEmitter } = require('events')
 
 class ConnectionUDPServer extends UDPsocket {
   constructor () {
     super('udp4', ...arguments)
 
-    this.on('message', function (...args) { this.emit('data', ...arguments) })
+    // for sending, not receiving
+    this._payloadUtils_ = new PayloadUtils(
+      this,
+      this,
+      (data, host, port) => {
+        this.send(data, 0, data.length, port, host)
+      }
+    )
 
-    this.on('data', (msg, rinfo) => {
-      console.log(rinfo)
-      // socket._payloadUtils_.read.bind(socket._payloadUtils_)
+    this.clients = {}
 
-      console.log(`server got: ${msg.length} bytes from ${rinfo.address}:${rinfo.port}`)
+    this.on('message', (msg, rinfo) => {
+      let address = `${rinfo.address}:${rinfo.port}`
+
+      if (!this.clients[address]) {
+        this.clients[address] = new EventEmitter()
+
+        this.clients[address]._rinfo = rinfo
+        this.clients[address]._payloadUtils_ = new PayloadUtils(
+          this.clients[address],
+          this.clients[address],
+          (data) => {
+            this.send(data, 0, data.length, rinfo.port, rinfo.address)
+          }
+        )
+
+        this.clients[address].on('payload', (...data) => {
+          this.emit('data', {
+            address: rinfo.address,
+            port: rinfo.port
+          }, ...data)
+        })
+      }
+
+      this.clients[address]._payloadUtils_.read(msg)
     })
+  }
+
+  write (data, host, port) {
+    this._payloadUtils_.write(data, host, port)
   }
 }
 

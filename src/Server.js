@@ -1,156 +1,201 @@
-let net = require("net");
-const dgram = require("dgram");
-const { EventEmitter } = require("events");
-const { Packets, PacketParser } = require("./lib/Protocol");
-const { ConnectionServer } = require("./lib/Connection");
+
+const { EventEmitter } = require('events')
+const { Packets, PacketParser } = require('./lib/Protocol')
+const Connection = require('./lib/Connection')
 
 class Server {
-  constructor(password) {
-    let self = this;
+  constructor (password) {
+    let self = this
 
-    this._UDPport = 41234;
-    this._TCPport = 41233;
+    this._UDPport = 41234
+    this._TCPport = 41233
 
-    this.password = password;
-    this._eventEmitter = new EventEmitter();
-    this.__authAttemptInterval__ = 1 * 1000;
-    this.__maxAuthAttempts__ = 4;
+    this.password = password
+    this._eventEmitter = new EventEmitter()
+    this.__authAttemptInterval__ = 1 * 1000
+    this.__maxAuthAttempts__ = 4
+
+    // TODO: Client ID / Session generator
+    this.clients = {
+      /*
+        {
+          TCP: net.Socket
+          UDP: (address, port)
+        }
+      */
+    }
+    this.clients_lookup = {}
 
     {
-      let TCPserver = new (ConnectionServer(net.Server))();
+      let TCPserver = new Connection.TCP.Server()
 
-      TCPserver.listen(this._TCPport, "127.0.0.1", function() {
-        const address = this.address();
-        console.log(`TCP server listening ${address.address}:${address.port}`);
-      });
+      TCPserver.listen(this._TCPport, '127.0.0.1', function () {
+        const address = this.address()
+        console.log(`TCP server listening ${address.address}:${address.port}`)
+      })
 
-      TCPserver.on("connection", function(socket) {
-        socket.__lastAuthenticationAttempt__ = 0;
-        socket.__authenticationAttemptCount__ = 0;
+      TCPserver.on('connection', function (socket) {
+        socket.__lastAuthenticationAttempt__ = 0
+        socket.__authenticationAttemptCount__ = 0
 
-        console.log("A new connection has been established.");
+        console.log('A new connection has been established.')
 
-        socket.on("payload", (...data) => {
-          self._onPayload(...data, socket);
-        });
+        socket.on('payload', (...data) => {
+          self._onPayload(...data, socket)
+        })
 
-        socket.on("end", function() {
-          console.log("Closing connection with the client");
-        });
+        socket.on('end', function () {
+          console.log('Closing connection with the client')
+        })
 
         // Don't forget to catch error, for your own sake.
-        socket.on("error", function(err) {
-          console.log(err);
-        });
-      });
+        socket.on('error', function (err) {
+          console.log(err)
+        })
+      })
 
-      this._TCPserver = TCPserver;
-      TCPserver.on("TEST", function() {
-        console.log("SERVER EVT");
-      });
+      this._TCPserver = TCPserver
     }
-    // {
-    //   let UDPserver = dgram.createSocket('udp4')
 
-    //   UDPserver.on('error', err => {
-    //     console.log(`server error:\n${err.stack}`)
-    //     UDPserver.close()
-    //   })
+    {
+      let UDPserver = new Connection.UDP.Server()
 
-    //   UDPserver.on('message', (msg, rinfo) => {
-    //     console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`)
-    //   })
+      UDPserver.on('listening', function () {
+        const address = this.address()
+        console.log(`UDP server listening ${address.address}:${address.port}`)
+      })
 
-    //   UDPserver.on('listening', function () {
-    //     const address = this.address()
-    //     console.log(`UDP server listening ${address.address}:${address.port}`)
-    //   })
+      UDPserver.on('data', function (rinfo, data) {
+        rinfo._isUDP = true
 
-    //   UDPserver.bind(41234, '0.0.0.0')
-    //   this._UDPserver = UDPserver
-    // }
+        self._onPayload(data, rinfo)
+      })
+
+      UDPserver.bind(this._UDPport, '0.0.0.0')
+      this._UDPserver = UDPserver
+    }
   }
 
-  _onPayload(payload, socket) {
-    function parseRawData(payload) {
-      console.log(payload);
-      let rawPacket;
-
-      try {
-        console.info(payload.toString());
-        rawPacket = JSON.parse(payload.toString());
-      } catch (e) {
-        throw Error("Packet could not be parsed");
-      }
-
-      return PacketParser(rawPacket);
-    }
-
+  _onPayload (payload, socket) {
     try {
-      let packet = parseRawData(payload);
-      this._onPacket(packet, socket);
+      let rawPacket = JSON.parse(payload.toString())
+      let packet = PacketParser(rawPacket)
+      this._onPacket(packet, socket)
     } catch (e) {
+      console.log('DROPPED: ', e)
       // If the parse fails, just drop the payload
     }
   }
 
-  _onPacket(packet, socket) {
-    if (packet.constructor === Packets.Hello) {
-      if (socket.__userAuthenticated__ === true) {
-        console.warn("Connection already authenticated...");
-      }
+  _onPacket (packet, socket) {
+    // console.debug('>RECV>', packet)
 
-      if (
-        new Date() - socket.__lastAuthenticationAttempt__ <
-        this.__authAttemptInterval__
-      ) {
-        return;
-      }
+    if (socket._isUDP) {
+      console.debug('>RECV_UDP>', packet)
+    } else {
+      console.debug('>RECV_TCP>', packet)
+    }
+    
+    let connectionPair = null
 
-      if (packet.data === this.password) {
-        socket.write(
-          Packets.r_Hello.create({
-            status: true,
-            udp_port: this._UDPport
-          })
-        );
-        socket.__userAuthenticated__ = true;
-      } else {
-        socket.write(
-          Packets.r_Hello.create({
-            status: false,
-            attempts:
-              this.__maxAuthAttempts__ - ++socket.__authenticationAttemptCount__
-          })
-        );
-        socket.__lastAuthenticationAttempt__ = new Date();
+    if (socket._isUDP) {
+      let address = `${socket.address}:${socket.port}`
 
-        if (
-          socket.__authenticationAttemptCount__ === this.__maxAuthAttempts__
-        ) {
-          console.log("BAD AUTH - LIMIT REACHED: KICK");
-          socket.destroy();
+      if (packet.constructor === Packets.Hello) {
+        connectionPair = this.clients[packet.data] // id
+        if (!connectionPair || !connectionPair.tcp) {
+          console.warn("Didn't find id in known clients but received an auth")
+          return
         }
-        return;
+
+        if (connectionPair.udp) console.warn('Already got Hello?')
+
+        connectionPair.udp = {
+          address: socket.address,
+          port: socket.port
+        }
+        this.clients_lookup[address] = connectionPair
+
+        return
+      }
+
+      // assume that a connection from the address is correct?
+      if (this.clients_lookup[address] && this.clients_lookup[address].tcp.__userAuthenticated__) {
+        connectionPair = this.clients_lookup[address]
+      }
+    } else {
+      // TCP
+      if (packet.constructor === Packets.Hello) {
+        if (socket.__userAuthenticated__ === true) {
+          console.warn('Connection already authenticated...')
+        } else {
+          if (
+            new Date() - socket.__lastAuthenticationAttempt__ <
+        this.__authAttemptInterval__
+          ) {
+            return
+          }
+
+          let data = packet.data
+
+          if (!data) return
+          if (!data.id) return
+
+          if (data.key === this.password) {
+            socket.write(
+              Packets.r_Hello.create({
+                status: true,
+                udp_port: this._UDPport
+              })
+            )
+            socket.__userAuthenticated__ = true
+
+            if (this.clients[data.id]) {
+              if (this.clients[data.id].tcp) this.clients[data.id].tcp.destroy()
+            } else {
+              this.clients[data.id] = {
+                tcp: socket
+              }
+              socket.__connectionPair = this.clients[data.id]
+            }
+          } else {
+            socket.write(
+              Packets.r_Hello.create({
+                status: false,
+                attempts:
+              this.__maxAuthAttempts__ - ++socket.__authenticationAttemptCount__
+              })
+            )
+            socket.__lastAuthenticationAttempt__ = new Date()
+
+            if (
+              socket.__authenticationAttemptCount__ === this.__maxAuthAttempts__
+            ) {
+              console.log('BAD AUTH - LIMIT REACHED: KICK')
+              socket.destroy()
+            }
+            return
+          }
+        }
+      }
+
+      if (socket.__userAuthenticated__) {
+        connectionPair = socket.__connectionPair
       }
     }
 
-    if (socket.__userAuthenticated__ !== true) {
-      console.log("NOT AUTHENTICATED");
+    if (!connectionPair) {
+      console.log('NOT AUTHENTICATED')
     }
 
-    this._eventEmitter.emit(packet.constructor, packet, socket);
+    this._eventEmitter.emit(packet.constructor, packet, connectionPair)
   }
 
-  on(evt, func) {
-    this._eventEmitter.on(evt, func.bind(this));
+  on (evt, func) {
+    this._eventEmitter.on(evt, func.bind(this))
   }
 }
 
 //
 
-let server = new Server("Hello123");
-server.on(Packets.Hello, function(packet, socket) {
-  console.log(packet);
-  // socket.destroy()
-});
+let server = new Server('Hello123')

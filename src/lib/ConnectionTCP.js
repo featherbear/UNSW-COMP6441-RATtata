@@ -33,9 +33,8 @@ class ConnectionTCPServer extends TCPserver {
         socket,
         socket.write.bind(socket)
       )
-      socket.write = (...args) => {
-        socket._payloadUtils_.write(...args)
-      }
+      socket.write = (...args) => socket._payloadUtils_.write(...args)
+
       socket.on(
         'data',
         socket._payloadUtils_.read.bind(socket._payloadUtils_)
