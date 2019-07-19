@@ -51,7 +51,9 @@
     }
   },
   "dependencies": {
+    "@mdi/font": "^3.8.95",
     "axios": "^0.18.0",
+    "buefy": "^0.7.10",
     "bulma": "^0.7.5",
     "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
