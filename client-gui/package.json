@@ -56,8 +56,7 @@
     "buefy": "^0.7.10",
     "bulma": "^0.7.5",
     "vue": "^2.5.16",
-    "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.1"
+    "vue-electron": "^1.0.6"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
