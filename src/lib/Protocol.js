@@ -44,7 +44,7 @@ class __Protocol {
   }
 
   toJSON () {
-    let data = {
+    const data = {
       packetType: this.packetType,
       messageType: this.messageType
     }
@@ -88,7 +88,7 @@ class _Data extends __Protocol {
 
 // packets
 
-let Packets = {}
+const Packets = {}
 
 Packets.KeepAlive = class KeepAlive extends _Connection {
   constructor () {
@@ -149,7 +149,7 @@ Packets.Control = class Control extends _Control {
 Packets.KeylogSetup = class KeylogSetup extends _Control {
   constructor () {
     super(...arguments)
-    if (!this.data || !("interval" in this.data)) {
+    if (!this.data || !('interval' in this.data)) {
       this.data = {
         interval: 5 * 1000
       }
@@ -279,7 +279,7 @@ function _identifyPacket (rawPacket) {
 
 function Parser (rawPacket) {
   try {
-    let PacketClass = _identifyPacket(rawPacket)
+    const PacketClass = _identifyPacket(rawPacket)
     return new PacketClass(rawPacket.data)
   } catch (e) {
     if (e) throw Error(`Bad packet: ${e}`)
