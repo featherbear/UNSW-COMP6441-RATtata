@@ -36,5 +36,7 @@ export default {
 </script>
 
 <style>
-  /* CSS */
+html {
+  overflow-y: hidden;
+}
 </style>

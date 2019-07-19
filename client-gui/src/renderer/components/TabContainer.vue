@@ -1,6 +1,6 @@
 <template>
   <div class="TabContainer">
-    <section name="about" >
+    <section name="about" class="active">
       <!-- <div class="wrapper"> -->
       <About></About>
       <!-- </div> -->
@@ -48,7 +48,6 @@ section.active {
 
 <script>
 import About from "../pages/About";
-
 import Connect from "../pages/Connect";
 // import Settings from "../pages/Settings";
 
