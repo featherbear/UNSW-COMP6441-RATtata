@@ -2,10 +2,10 @@
   <div id="app">
     <div class="columns is-mobile">
       <div class="column is-2">
-        <MenuBar :currentTab="currentTab" @tabChange="changeTab"></MenuBar>
+        <MenuBar :currentTab="currentTab" :connections="connections" @tabChange="changeTab"></MenuBar>
       </div>
       <div class="column">
-        <TabContainer :currentTab="currentTab" @tabChange="changeTab"></TabContainer>
+        <TabContainer :currentTab="currentTab" :connections="connections" @tabChange="changeTab"></TabContainer>
       </div>
     </div>
   </div>
@@ -19,7 +19,21 @@ export default {
   name: "client-gui",
   data() {
     return {
-      currentTab: undefined
+      currentTab: undefined,
+      connections: {
+        "1": {
+          name: "Paperweight",
+          os: "mac"
+        },
+        "2": {
+          name: "Blue Screen",
+          os: "windows"
+        },
+        "3": {
+          name: "rm -rf /",
+          os: "linux"
+        }
+      }
     };
   },
   methods: {
