@@ -86,5 +86,7 @@ export default {
 <style scoped>
 .MenuBar {
   padding: 10px;
+  -webkit-user-select: none;
+  user-select: none;
 }
 </style>

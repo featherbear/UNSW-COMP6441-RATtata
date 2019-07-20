@@ -1,7 +1,8 @@
 <template>
   <div id="app">
-    <div class="columns is-mobile">
-      <div class="column is-2">
+    <div class="columns is-mobile is-gapless">
+      <!-- is-0 -->
+      <div class="column is-narrow MenuBarContainer" style="border-right: 1px solid rgba(0,0,0,0.2);">
         <MenuBar :currentTab="currentTab" :connections="connections" @tabChange="changeTab"></MenuBar>
       </div>
       <div class="column">
@@ -52,5 +53,9 @@ export default {
 <style>
 html {
   overflow-y: hidden;
+}
+
+.MenuBarContainer {
+  max-width: 250px;
 }
 </style>
