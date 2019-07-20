@@ -1,6 +1,6 @@
-# my-project
+# client-gui
 
-> An electron-vue project
+> RATtata Client
 
 #### Build Setup
 
