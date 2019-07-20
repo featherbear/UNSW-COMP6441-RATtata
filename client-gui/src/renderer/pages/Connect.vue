@@ -1,9 +1,23 @@
 <template>
-  <b-table :data="data" :columns="columns"></b-table>
+  <div>
+    <b-field grouped>
+      <b-input placeholder="Server address" icon="earth" expanded></b-input>
+      <p class="control">
+        <button class="button is-primary">Connect</button>
+      </p>
+    </b-field>
+    <b-divider label="PAST CONNECTIONS"></b-divider>
+    <b-table :data="data" :columns="columns" hoverable></b-table>
+  </div>
 </template>
 
 <script>
+import Divider from "../components/b-divider";
+
 export default {
+  components: {
+    "b-divider": Divider
+  },
   data() {
     return {
       data: [
