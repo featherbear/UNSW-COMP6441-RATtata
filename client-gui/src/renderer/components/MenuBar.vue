@@ -52,6 +52,7 @@ export default {
     }
   },
   mounted() {
+    // Not using {immediate: true} as `$el` does not mount everything in time
     this.show(this.$store.state.Window.currentPage);
   },
   methods: {

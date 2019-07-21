@@ -53,18 +53,31 @@ export default {
           client.on("connect", () => {
             console.log("Connected!");
             // TODO: Vuex
+
+//stackoverflow 42133894
+            // this.$store.state.Connections.connections = {
+            //   ...this.$store.state.Connections.connections,
+            //   [client.__serverID]: {
+            //     id: client.__serverID,
+            //     name: "...",
+            //     address: this.address,
+            //     data: {}
+            //   }
+            // };
+
             this.$store.state.Connections.connections[client.__serverID] = {
               id: client.__serverID,
               name: "...",
               address: this.address,
               data: {}
             };
-
-            
           });
 
           client.on("poll", pollData => {
-            Object.apply(this.$store.state.Connections.connections[client.__serverID], pollData)
+            Object.apply(
+              this.$store.state.Connections.connections[client.__serverID],
+              pollData
+            );
           });
 
           client.on("badAuth", remainingTries => {
