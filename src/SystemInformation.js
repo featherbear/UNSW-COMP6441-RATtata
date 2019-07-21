@@ -3,6 +3,37 @@ const si = require('systeminformation')
 async function run () {
   //   console.log(await si.cpuCurrentspeed().then(d => d.avg))
   // console.log(await si.cpu())// .then(d => d.speed))
+  {
+    let uptime = si.time().uptime
+    const data = []
+
+    // Seconds
+    data.push(uptime % 60)
+
+    // Minutes
+    uptime /= 60
+    data.push(parseInt(uptime) % 60)
+
+    // Hours
+    uptime /= 60
+    data.push(parseInt(uptime) % 24)
+
+    // Days
+    uptime /= 24
+    data.push(parseInt(uptime % (365.25 / 12)))
+
+    // Months
+    uptime /= 365.25 / 12
+    data.push(parseInt(uptime) % 12)
+
+    // Years
+    uptime /= 12
+    data.push(parseInt(uptime))
+
+    console.log('Uptime:', data.reverse())
+
+    // years, months, days, hours, seconds
+  }
 
   const osInfo = await si.osInfo()
   console.log('Platform:', osInfo.platform)
