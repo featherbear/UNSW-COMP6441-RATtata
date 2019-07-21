@@ -25,6 +25,7 @@
     "node-machine-id": "^1.1.12",
     "pkg": "^4.4.0",
     "screenshot-node": "^1.2.1",
+    "systeminformation": "^4.14.4",
     "tmp": "^0.1.0"
   }
 }

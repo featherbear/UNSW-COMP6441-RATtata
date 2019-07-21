@@ -3,22 +3,12 @@ const { Packets, PacketParser } = require('./lib/Protocol')
 const Connection = require('./lib/Connection')
 const UUID = require('node-machine-id').machineIdSync()
 
-class Client {
+class Client extends EventEmitter {
   constructor () {
-    console.log('Client init')
-    this._eventEmitter = new EventEmitter()
+    super()
     this._TCPclient = new Connection.TCP.Client()
     this._UDPclient = new Connection.UDP.Client()
     this.__data = {}
-
-    // {
-    //   // HOOK
-    //   let _writeFn = this._UDPclient.write.bind(this._UDPclient)
-    //   this._UDPclient.write = (data, host, port, sendID) => {
-    //     if (sendID !== false) data.id = UUID
-    //     _writeFn(data, host, port)
-    //   }
-    // }
 
     this.__isAuthenticated__ = null
 
@@ -32,8 +22,9 @@ class Client {
     })
 
     this.on(Packets.Poll, function (packet) {
-      this.__data = { ...(this.data || {}), ...(packet.data || {}) }
-      console.log(this.__data)
+      // Not supported in Electron - this.__data = { ...(this.__data || {}), ...(packet.data || {}) }
+      this.__data = Object.assign(this.__data, packet.data || {})
+      // console.log(this.__data)
       this.emit('poll', this.__data)
     })
   }
@@ -90,8 +81,16 @@ class Client {
             this.__onAuth()
             this.__onAuth = null
           }
-        } else {
+        } else if (data.status === false) {
           console.log(`Authentication fail - ${data.attempts} attempts left!`)
+        } else if (data.status === null) {
+          console.log('This thing happened')
+
+          if (data.id) {
+            console.log('This thing actually happened')
+            this.emit('serverID', data.id)
+            console.log('This thing should have actually happened now')
+          }
         }
       }
     } else {
@@ -109,15 +108,12 @@ class Client {
       host,
       () => this.login(password)
     )
+    // return this
   }
 
   login (password) {
     if (this.__isAuthenticated__) return
     this._TCPclient.write(Packets.Hello.create({ id: UUID, key: password }))
-  }
-
-  on (evt, func) {
-    this._eventEmitter.on(evt, func.bind(this))
   }
 }
 
