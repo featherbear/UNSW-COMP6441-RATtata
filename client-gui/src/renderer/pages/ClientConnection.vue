@@ -6,9 +6,9 @@
   </div>
 </template>
 <script>
-import Navbar from "./ClientConnection/Navbar";
-import General from "./ClientConnection/General";
-import Keylog from "./ClientConnection/Keylog";
+import Navbar from "../components/ClientConnection/Navbar";
+import General from "../components/ClientConnection/General";
+import Keylog from "../components/ClientConnection/Keylog";
 
 export default {
   components: {
