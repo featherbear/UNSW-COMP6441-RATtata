@@ -8,7 +8,6 @@ class Client extends EventEmitter {
     super()
     this._TCPclient = new Connection.TCP.Client()
     this._UDPclient = new Connection.UDP.Client()
-    this.__data = {}
 
     this.__isAuthenticated__ = null
 
@@ -22,10 +21,7 @@ class Client extends EventEmitter {
     })
 
     this.on(Packets.Poll, function (packet) {
-      // Not supported in Electron - this.__data = { ...(this.__data || {}), ...(packet.data || {}) }
-      this.__data = Object.assign(this.__data, packet.data || {})
-      // console.log(this.__data)
-      this.emit('poll', this.__data)
+      this.emit('poll', packet.data || {})
     })
   }
 
@@ -62,7 +58,7 @@ class Client extends EventEmitter {
 
           this._UDPclient.write(
             Packets.Hello.create(UUID),
-            '127.0.0.1',
+            this.__host,
             data.udp_port
           )
 
@@ -72,7 +68,7 @@ class Client extends EventEmitter {
           this.__keepAliveLoop__ = setInterval(() => {
             this._UDPclient.write(
               Packets.KeepAlive.create(),
-              '127.0.0.1',
+              this.__host,
               data.udp_port
             )
           }, 3000)
@@ -83,24 +79,24 @@ class Client extends EventEmitter {
           }
         } else if (data.status === false) {
           console.log(`Authentication fail - ${data.attempts} attempts left!`)
+          this.emit('badAuth', data.attempts)
         } else if (data.status === null) {
-          console.log('This thing happened')
-
           if (data.id) {
-            console.log('This thing actually happened')
             this.emit('serverID', data.id)
-            console.log('This thing should have actually happened now')
           }
         }
       }
     } else {
       if (this.__isAuthenticated__) {
-        this._eventEmitter.emit(packet.constructor, packet)
+        this.emit(packet.constructor, packet)
       }
     }
   }
 
   connect (port, host, password, connectCallback) {
+    this.__host = host
+    this.__TCPport = port
+
     if (connectCallback) this.__onAuth = connectCallback
     this.__isAuthenticated__ = false
     this._TCPclient.connect(
@@ -108,7 +104,6 @@ class Client extends EventEmitter {
       host,
       () => this.login(password)
     )
-    // return this
   }
 
   login (password) {
