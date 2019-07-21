@@ -9,6 +9,7 @@ class Client {
     this._eventEmitter = new EventEmitter()
     this._TCPclient = new Connection.TCP.Client()
     this._UDPclient = new Connection.UDP.Client()
+    this.__data = {}
 
     // {
     //   // HOOK
@@ -24,6 +25,16 @@ class Client {
     const self = this
     this._TCPclient.on('payload', function (...data) {
       self._onPayload(...data, this)
+    })
+
+    this._UDPclient.on('payload', function (...data) {
+      self._onPayload(...data, this)
+    })
+
+    this.on(Packets.Poll, function (packet) {
+      this.__data = { ...(this.data || {}), ...(packet.data || {}) }
+      console.log(this.__data)
+      this.emit('poll', this.__data)
     })
   }
 
@@ -61,8 +72,7 @@ class Client {
           this._UDPclient.write(
             Packets.Hello.create(UUID),
             '127.0.0.1',
-            data.udp_port,
-            false
+            data.udp_port
           )
 
           if (this.__keepAliveLoop__) clearInterval(this.__keepAliveLoop__)
@@ -72,8 +82,7 @@ class Client {
             this._UDPclient.write(
               Packets.KeepAlive.create(),
               '127.0.0.1',
-              data.udp_port,
-              false
+              data.udp_port
             )
           }, 3000)
 

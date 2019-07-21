@@ -9,6 +9,11 @@ class ConnectionUDPClient extends UDPsocket {
     this._payloadUtils_ = new PayloadUtils(this, this, (data, host, port) => {
       this.send(data, 0, data.length, port, host)
     })
+
+    this.on('message', (msg, rinfo) => {
+      // const address = `${rinfo.address}:${rinfo.port}`
+      this._payloadUtils_.read(msg)
+    })
   }
 
   write (data, host, port) {
