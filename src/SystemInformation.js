@@ -42,12 +42,12 @@ async function run () {
   console.log('Kernel:', osInfo.kernel)
   console.log('Hostname:', osInfo.hostname)
   console.log('Logo File:', osInfo.logofile)
-
   //   logofile || platform
 
-  const users = await si.users()
+  // const users = await si.users()
+  // console.log(users)
 
-  const hasMonitor = (await si.graphics()).displays !== []
+  const hasMonitor = (await si.graphics()).displays.length !== 0
   console.log('Has Monitor:', hasMonitor)
 
   const networkInterfaces = await si.networkInterfaces()
@@ -69,6 +69,9 @@ async function run () {
       memory.total / memoryUnitMultiplier
     ).toFixed(1)} ${memoryUnitMap[memoryUnitIndex]}`
   )
+
+  const load = await si.currentLoad()
+  console.log('Current Load:', load.currentload.toFixed(0) + '%')
 }
 
 run()
