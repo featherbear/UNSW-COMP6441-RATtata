@@ -1,15 +1,21 @@
 <template>
-  <Section title="Keyboard Log">clickity clackity type-dy doo</Section>
+  <Card title="Keyboard Log">clickity clackity type-dy doo</Card>
 </template>
 
 
 <script>
-import Section from "./_Section";
+import Card from "./_Card";
 
 export default {
   components: {
-    Section
+    Card
   },
-  props: ["data"]
+  computed: {
+    data() {
+   return {};
+   //   return this.$store.state.Connections.connections[this.iden];
+    }
+  },
+  props: ["iden"]
 };
 </script>

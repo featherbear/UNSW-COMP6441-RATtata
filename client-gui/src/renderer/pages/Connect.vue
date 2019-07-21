@@ -1,11 +1,13 @@
 <template>
-  <div>
-    <b-field grouped>
-      <b-input placeholder="Server address" icon="earth" expanded></b-input>
-      <p class="control">
-        <button class="button is-primary">Connect</button>
-      </p>
-    </b-field>
+  <div class="container">
+    <div class="connectForm">
+      <b-field grouped>
+        <b-input placeholder="Server address" icon="earth" v-model.trim="address" expanded></b-input>
+        <p class="control">
+          <button class="button is-primary" @click="connect">Connect</button>
+        </p>
+      </b-field>
+    </div>
     <b-divider label="PAST CONNECTIONS"></b-divider>
     <b-table :data="data" :columns="columns" hoverable></b-table>
   </div>
@@ -18,71 +20,67 @@ export default {
   components: {
     "b-divider": Divider
   },
+  methods: {
+    connect() {
+      console.log(this.store, this.$store);
+      let address = this.address;
+
+      this.$dialog.prompt({
+        inputAttrs: {
+          type: "password",
+          placeholder: "Enter server password"
+        },
+        confirmText: "Connect",
+        hasIcon: true,
+        title: `Connecting to server...`,
+        icon: "lock",
+        iconPack: "mdi",
+        onConfirm: password => {
+          this.$toast.open("Tada!");
+        }
+      });
+    }
+  },
   data() {
     return {
+      address: "",
       data: [
         {
-          id: 1,
-          first_name: "Jesse",
-          last_name: "Simmons",
-          date: "2016-10-15 13:43:27",
-          gender: "Male"
+          address: "blackbox.proxy-local:44132",
+          last_connected: "2019-07-21 19:43:27"
         },
         {
-          id: 2,
-          first_name: "John",
-          last_name: "Jacobs",
-          date: "2016-12-15 06:00:53",
-          gender: "Male"
+          address: "sandbox:44132",
+          last_connected: "2019-07-20 02:12:10"
         },
         {
-          id: 3,
-          first_name: "Tina",
-          last_name: "Gilbert",
-          date: "2016-04-26 06:26:28",
-          gender: "Female"
+          address: "127.0.0.1:44133",
+          last_connected: "2019-07-20 02:12:08"
         },
         {
-          id: 4,
-          first_name: "Clarence",
-          last_name: "Flores",
-          date: "2016-04-10 10:28:46",
-          gender: "Male"
-        },
-        {
-          id: 5,
-          first_name: "Anne",
-          last_name: "Lee",
-          date: "2016-12-06 14:38:38",
-          gender: "Female"
+          address: "deathstar:44132",
+          last_connected: "2019-07-19 12:16:01"
         }
       ],
       columns: [
         {
-          field: "id",
-          label: "ID",
-          width: "40",
-          numeric: true
+          field: "address",
+          label: "Host"
         },
         {
-          field: "first_name",
-          label: "First Name"
-        },
-        {
-          field: "last_name",
-          label: "Last Name"
-        },
-        {
-          field: "date",
-          label: "Date",
+          field: "last_connected",
+          label: "Last Connected",
           centered: true
-        },
-        {
-          field: "gender",
-          label: "Gender"
         }
       ]
     };
   }
 };
 </script>
+
+
+<style scoped>
+.connectForm {
+  margin-top: 30px;
+}
+</style>

@@ -1,8 +1,8 @@
 <template>
   <div>
-    <Navbar :data="data"></Navbar>
-    <General :data="data"></General>
-    <Keylog :data="data"></Keylog>
+    <Navbar :iden="iden"></Navbar>
+    <General :iden="iden"></General>
+    <Keylog :iden="iden"></Keylog>
   </div>
 </template>
 <script>
@@ -16,7 +16,7 @@ export default {
     General,
     Keylog
   },
-  props: ["data"]
+  props: ["iden"]
 };
 </script>
 <style scoped>

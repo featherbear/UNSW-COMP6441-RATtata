@@ -1,5 +1,5 @@
 <template>
-  <div class="MenuBar">
+  <div class="MenuBar is-unselectable">
     <b-menu>
       <b-menu-list label="RATtata">
         <b-menu-item icon="information-outline" label="About" to="about" @click="evtHandler"></b-menu-item>
@@ -19,16 +19,18 @@
         <!-- <b-menu-item icon="account" label="My Account">
           <b-menu-item label="Account data"></b-menu-item>
           <b-menu-item label="Addresses"></b-menu-item>
-        </b-menu-item> -->
+        </b-menu-item>-->
       </b-menu-list>
 
       <b-menu-list label="Connections" v-if="Object.keys(connections).length">
         <!-- <b-menu-item v-if="!Object.keys(connections).length" label="..." disabled></b-menu-item> -->
         <b-menu-item
           v-for="conn in connections"
-          :key="conn.name"
+          :key="conn.id"
           :icon="osToIcon(conn.os)"
           :label="conn.name"
+          :to="'conn-' + conn.id"
+          @click="evtHandler"
         ></b-menu-item>
       </b-menu-list>
     </b-menu>
@@ -37,6 +39,7 @@
 
 <script>
 import { mapState } from "vuex";
+import {osToIcon} from "./_iconUtils";
 
 export default {
   computed: mapState({
@@ -44,42 +47,36 @@ export default {
     connections: state => state.Connections.connections
   }),
   watch: {
-    currentPage(tabName, oldVal) {
-      let newElement = this.$el.querySelector(`[to=${tabName}]`);
+    currentPage(newVal, oldVal) {
+      this.show(newVal);
+    }
+  },
+  mounted() {
+    this.show(this.$store.state.Window.currentPage);
+  },
+  methods: {
+    osToIcon,
+    show(tab) {
+      let newElement = this.$el.querySelector(`[to=${tab}]`);
       if (!newElement) {
-        console.error(`No tab "${tabName}" found`);
         return;
       }
 
-      let currentElement = this.$el.querySelector("is-active");
+      let currentElement = this.$el.querySelector(".is-active");
 
-      if (currentElement == newElement) return;
-
+      if (currentElement == newElement) {
+        return;
+      }
       currentElement && currentElement.classList.remove("is-active");
       newElement.classList.add("is-active");
-      console.log(`Switched to ${tabName}`);
-    }
-  },
-  methods: {
+    },
+
     evtHandler(evt) {
       this.$store.dispatch(
         "changePage",
         evt.target.getAttribute("to") ||
           evt.target.parentNode.getAttribute("to")
       );
-    },
-
-    osToIcon(osString) {
-      switch (osString) {
-        case "mac":
-          return "apple";
-        case "windows":
-          return "windows";
-        case "linux":
-          return "linux";
-        default:
-          return "monitor";
-      }
     }
   }
 };
@@ -89,6 +86,6 @@ export default {
 .MenuBar {
   padding: 10px;
   -webkit-user-select: none;
-  user-select: none;
+  cursor: default;
 }
 </style>

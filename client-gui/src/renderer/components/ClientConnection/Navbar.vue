@@ -1,25 +1,25 @@
 <template>
-  <nav class="navbar is-light" role="navigation" aria-label="main navigation">
+  <nav class="navbar is-light is-unselectable" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
-      <div class="navbar-item">OS ICON?</div>
-      <div class="navbar-item">SERVER NAME</div>
+      <div class="navbar-item">
+        <b-icon :icon="osToIcon(data.os)"></b-icon>
+      </div>
+      <div class="navbar-item">{{data.name}}</div>
     </div>
-
-    <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item">Home</a>
-
-        <a class="navbar-item">Documentation</a>
+        <!-- <a class="navbar-item">Home</a>
+        <a class="navbar-item">Documentation</a> -->
 
         <div class="navbar-item has-dropdown is-hoverable">
-          <a class="navbar-link">More</a>
+          <a class="navbar-link">more</a>
 
           <div class="navbar-dropdown">
-            <a class="navbar-item">About</a>
-            <a class="navbar-item">Jobs</a>
-            <a class="navbar-item">Contact</a>
+            <a class="navbar-item">Screenshot</a>
+            <a class="navbar-item">Keylog</a>
+            <a class="navbar-item">Lock Screen</a>
             <hr class="navbar-divider" />
-            <a class="navbar-item">Report an issue</a>
+            <a class="navbar-item">...</a>
           </div>
         </div>
       </div>
@@ -39,8 +39,18 @@
 
 
 <script>
+import { osToIcon } from "../_iconUtils";
+
 export default {
-  props: ["data"]
+  props: ["iden"],
+  methods: {
+    osToIcon
+  },
+  computed: {
+    data() {
+      return this.$store.state.Connections.connections[this.iden];
+    }
+  }
 };
 </script>
 
@@ -48,5 +58,7 @@ export default {
 nav.navbar {
   position: sticky;
   top: 0;
+
+  cursor: default;
 }
 </style>
