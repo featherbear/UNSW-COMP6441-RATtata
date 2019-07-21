@@ -36,15 +36,16 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 export default {
-  components: {},
-  props: ["currentTab", "connections"],
+  computed: mapState({
+    currentPage: state => state.Window.currentPage,
+    connections: state => state.Connections.connections
+  }),
   watch: {
-    currentTab(tabName, oldVal) {
-      console.log("MenuBar::currentTab");
-
-      let newElement = this.$el.querySelector(`[name=${tabName}]`);
-
+    currentPage(tabName, oldVal) {
+      let newElement = this.$el.querySelector(`[to=${tabName}]`);
       if (!newElement) {
         console.error(`No tab "${tabName}" found`);
         return;
@@ -61,12 +62,13 @@ export default {
   },
   methods: {
     evtHandler(evt) {
-      this.$emit(
-        "tabChange",
+      this.$store.dispatch(
+        "changePage",
         evt.target.getAttribute("to") ||
           evt.target.parentNode.getAttribute("to")
       );
     },
+
     osToIcon(osString) {
       switch (osString) {
         case "mac":
