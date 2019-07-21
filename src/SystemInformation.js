@@ -1,10 +1,17 @@
 const si = require('systeminformation')
 
-async function run () {
-  //   console.log(await si.cpuCurrentspeed().then(d => d.avg))
-  // console.log(await si.cpu())// .then(d => d.speed))
-  {
-    let uptime = si.time().uptime
+async function getMetaInformation () {
+  const osInfo = await si.osInfo()
+  console.log('Platform:', osInfo.platform)
+  console.log('Distro:', osInfo.distro)
+
+  console.log('Kernel:', osInfo.kernel)
+  console.log('Hostname:', osInfo.hostname)
+  console.log('Logo File:', osInfo.logofile)
+
+  const uptime = si.time().uptime
+  /*
+   {
     const data = []
 
     // Seconds
@@ -34,14 +41,10 @@ async function run () {
 
     // years, months, days, hours, seconds
   }
-
-  const osInfo = await si.osInfo()
-  console.log('Platform:', osInfo.platform)
-  console.log('Distro:', osInfo.distro)
-
-  console.log('Kernel:', osInfo.kernel)
-  console.log('Hostname:', osInfo.hostname)
-  console.log('Logo File:', osInfo.logofile)
+  */
+  // Client-side can parse, as well as tick 1 second
+}
+async function getNewInformation () {
   //   logofile || platform
 
   // const users = await si.users()
@@ -73,5 +76,3 @@ async function run () {
   const load = await si.currentLoad()
   console.log('Current Load:', load.currentload.toFixed(0) + '%')
 }
-
-run()
