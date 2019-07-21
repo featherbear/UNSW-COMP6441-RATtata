@@ -19,6 +19,12 @@
 import MenuBar from "./components/MenuBar";
 import TabContainer from "./components/TabContainer";
 
+window.RATtata = {
+  connections: {
+    
+  }
+}
+
 export default {
   name: "client-gui",
   components: {

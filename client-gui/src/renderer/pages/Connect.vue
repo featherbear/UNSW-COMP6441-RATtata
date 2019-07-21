@@ -35,7 +35,64 @@ export default {
         icon: "lock",
         iconPack: "mdi",
         onConfirm: password => {
-          this.$toast.open("Tada!");
+          // TODO: Refactor
+
+          let { spawnClient } = require("../components/_RATtataClient");
+
+          let [host, port] = this.address.split(":");
+          port = parseInt(port);
+
+          let client = spawnClient(host, port, password);
+          client.on("serverID", id => {
+            client.__serverID = id;
+            window.RATtata.connections[id] = {
+              client
+            };
+          });
+
+          client.on("connect", () => {
+            console.log("Connected!");
+            // TODO: Vuex
+            this.$store.state.Connections.connections[client.__serverID] = {
+              id: client.__serverID,
+              name: "...",
+              address: this.address,
+              data: {}
+            };
+
+            
+          });
+
+          client.on("poll", pollData => {
+            Object.apply(this.$store.state.Connections.connections[client.__serverID], pollData)
+          });
+
+          client.on("badAuth", remainingTries => {
+            if (!remainingTries) {
+              this.$dialog.alert({
+                title: "Server disconnected",
+                message: "You were kicked for too many authentication failures"
+              });
+              return;
+            }
+
+            this.$dialog.prompt({
+              inputAttrs: {
+                type: "password",
+                placeholder: "Enter server password"
+              },
+              message: `Remaining attempts: ${remainingTries}`,
+              confirmText: "Connect",
+              hasIcon: true,
+              title: `Incorrect password`,
+              icon: "lock",
+              iconPack: "mdi",
+
+              onConfirm: password => {
+                client.login(password);
+              }
+            });
+          });
         }
       });
     }
