@@ -22,7 +22,6 @@ export default {
   },
   methods: {
     connect() {
-      console.log(this.store, this.$store);
       let address = this.address;
 
       this.$dialog.prompt({

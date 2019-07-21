@@ -1,14 +1,10 @@
 <template>
   <div class="TabContainer">
     <section name="about" class="active">
-      <!-- <div class="wrapper"> -->
       <About></About>
-      <!-- </div> -->
     </section>
     <section name="connect">
-      <!-- <div class="wrapper"> -->
       <Connect></Connect>
-      <!-- </div> -->
     </section>
     <section name="settings">
       <!-- data-simplebar -->
@@ -64,7 +60,7 @@ export default {
     }
   },
   mounted() {
-    this.show(this.$store.state.Window.currentPage)
+    this.show(this.$store.state.Window.currentPage);
   },
   data() {
     return {
@@ -111,9 +107,9 @@ section.active {
   z-index: 1;
 }
 
-.wrapper {
-  background-color: white;
-  height: 100%;
+section[name=connect] {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>
 
