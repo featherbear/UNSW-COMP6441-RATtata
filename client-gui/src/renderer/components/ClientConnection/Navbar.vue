@@ -52,6 +52,7 @@ export default {
   },
   computed: {
     clientConnected() {
+      return true; // TODO: 
       return window.RATtata.connections[this.iden];
     },
     data() {

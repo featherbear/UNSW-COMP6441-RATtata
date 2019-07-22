@@ -16,7 +16,7 @@ function spawnClient (host, port) {
 
       setInterval(
         () => this._TCPclient.write(Packets.Screenshot.create()),
-        3000
+        1000
       )
 
       this.on(Packets.r_Screenshot, function (packet) {
