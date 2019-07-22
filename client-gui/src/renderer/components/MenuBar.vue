@@ -27,8 +27,8 @@
         <b-menu-item
           v-for="id in connectionList"
           :key="id"
-          :icon="osToIcon(servers[id].os)"
-          :label="servers[id].name"
+          :icon="osToIcon(servers[id].os || servers[id].data.platform || servers[id].data.logofile)"
+          :label="servers[id].name || servers[id].data.hostname"
           :to="'conn-' + id"
           @click="evtHandler"
         ></b-menu-item>

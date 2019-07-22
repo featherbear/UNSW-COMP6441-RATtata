@@ -3,6 +3,7 @@ function osToIcon (osString) {
     case 'mac':
       return 'apple'
     case 'windows':
+    case 'win32':
       return 'windows'
     case 'linux':
       return 'linux'

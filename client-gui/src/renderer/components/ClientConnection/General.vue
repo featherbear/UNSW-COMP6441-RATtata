@@ -3,14 +3,14 @@
     <nav class="level">
       <div class="level-item has-text-centered">
         <div>
-          <p class="heading is-unselectable">WAN IP</p>
-          <p class="title">{{data.address}}</p>
+          <p class="heading is-unselectable">Connected Address</p>
+          <p class="title">{{clientConnected ? data.address : "-"}}</p>
         </div>
       </div>
       <div v-if="getLanIPs" class="level-item has-text-centered">
         <div>
           <p class="heading is-unselectable">LAN IP</p>
-          <p class="title">{{getLanIPs.join(", ")}}</p>
+          <p class="title" style="white-space: pre">{{getLanIPs.join("\n")}}</p>
         </div>
       </div>
       <div class="level-item has-text-centered">
@@ -43,6 +43,7 @@ export default {
   components: {
     Card
   },
+
   computed: {
     clientConnected() {
       return window.RATtata.connections[this.iden];
@@ -51,15 +52,18 @@ export default {
       return this.$store.state.Connections.servers[this.iden];
     },
     getLanIPs() {
+      if (!this.clientConnected) return ["-"];
       return (this.data.data.lanIPs || ["-"]).filter(
         address => address !== this.data.address.split(":")[0]
       );
     },
     getMemoryString() {
+      if (!this.clientConnected) return "-";
       if (!this.data.data.memorySuffix) return "-";
       return `${this.data.data.memoryUsed} / ${this.data.data.memoryTotal} ${this.data.data.memorySuffix}`;
     },
     getCPU() {
+      if (!this.clientConnected) return "-";
       if (!this.data.data.cpu_load) return "-";
       return this.data.data.cpu_load + "%";
     },

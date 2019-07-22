@@ -2,14 +2,14 @@
   <nav class="navbar is-light is-unselectable" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <div class="navbar-item">
-        <b-icon :icon="osToIcon(data.os)"></b-icon>
+        <b-icon :icon="osToIcon(data.os || data.data.platform || data.data.logofile)"></b-icon>
       </div>
-      <div class="navbar-item">{{data.name}}</div>
+      <div class="navbar-item">{{data.name || data.data.hostname}}</div>
     </div>
     <div class="navbar-menu">
       <div class="navbar-start">
         <!-- <a class="navbar-item">Home</a>
-        <a class="navbar-item">Documentation</a> -->
+        <a class="navbar-item">Documentation</a>-->
 
         <div class="navbar-item has-dropdown is-hoverable">
           <a class="navbar-link">more</a>
@@ -25,11 +25,11 @@
       </div>
 
       <div class="navbar-end">
-        <div class="navbar-item">
+        <div class="navbar-item" v-if="clientConnected">
           <div class="buttons">
-            <a class="button is-danger">
+             <b-button type="is-danger" @click="disconnect">
               <strong>Disconnect</strong>
-            </a>
+             </b-button>
           </div>
         </div>
       </div>
@@ -44,9 +44,16 @@ import { osToIcon } from "../_iconUtils";
 export default {
   props: ["iden"],
   methods: {
-    osToIcon
+    osToIcon,
+    disconnect() {
+      window.RATtata.connections[this.iden].close()
+      delete window.RATtata.connections[this.iden]
+    }
   },
   computed: {
+    clientConnected() {
+      return window.RATtata.connections[this.iden];
+    },
     data() {
       return this.$store.state.Connections.servers[this.iden];
     }
