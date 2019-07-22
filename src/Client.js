@@ -106,7 +106,7 @@ class Client extends EventEmitter {
     this._TCPclient.connect(
       port,
       host,
-      () => this.login(password)
+      () => password ? this.login(password) : null
     )
   }
 
