@@ -3,21 +3,11 @@ const { Packets, PacketParser } = require('./lib/Protocol')
 const Connection = require('./lib/Connection')
 const UUID = require('node-machine-id').machineIdSync()
 
-class Client {
+class Client extends EventEmitter {
   constructor () {
-    console.log('Client init')
-    this._eventEmitter = new EventEmitter()
+    super()
     this._TCPclient = new Connection.TCP.Client()
     this._UDPclient = new Connection.UDP.Client()
-
-    // {
-    //   // HOOK
-    //   let _writeFn = this._UDPclient.write.bind(this._UDPclient)
-    //   this._UDPclient.write = (data, host, port, sendID) => {
-    //     if (sendID !== false) data.id = UUID
-    //     _writeFn(data, host, port)
-    //   }
-    // }
 
     this.__isAuthenticated__ = null
 
@@ -25,6 +15,18 @@ class Client {
     this._TCPclient.on('payload', function (...data) {
       self._onPayload(...data, this)
     })
+
+    this._UDPclient.on('payload', function (...data) {
+      self._onPayload(...data, this)
+    })
+
+    this.on(Packets.Poll, function (packet) {
+      this.emit('poll', packet.data || {})
+    })
+  }
+
+  isConnected () {
+    return this.__isAuthenticated__
   }
 
   _onPayload (payload) {
@@ -60,9 +62,8 @@ class Client {
 
           this._UDPclient.write(
             Packets.Hello.create(UUID),
-            '127.0.0.1',
-            data.udp_port,
-            false
+            this.__host,
+            data.udp_port
           )
 
           if (this.__keepAliveLoop__) clearInterval(this.__keepAliveLoop__)
@@ -71,9 +72,8 @@ class Client {
           this.__keepAliveLoop__ = setInterval(() => {
             this._UDPclient.write(
               Packets.KeepAlive.create(),
-              '127.0.0.1',
-              data.udp_port,
-              false
+              this.__host,
+              data.udp_port
             )
           }, 3000)
 
@@ -81,24 +81,32 @@ class Client {
             this.__onAuth()
             this.__onAuth = null
           }
-        } else {
+        } else if (data.status === false) {
           console.log(`Authentication fail - ${data.attempts} attempts left!`)
+          this.emit('badAuth', data.attempts)
+        } else if (data.status === null) {
+          if (data.id) {
+            this.emit('serverID', data.id)
+          }
         }
       }
     } else {
       if (this.__isAuthenticated__) {
-        this._eventEmitter.emit(packet.constructor, packet)
+        this.emit(packet.constructor, packet)
       }
     }
   }
 
   connect (port, host, password, connectCallback) {
+    this.__host = host
+    this.__TCPport = port
+
     if (connectCallback) this.__onAuth = connectCallback
     this.__isAuthenticated__ = false
     this._TCPclient.connect(
       port,
       host,
-      () => this.login(password)
+      () => password ? this.login(password) : null
     )
   }
 
@@ -107,8 +115,9 @@ class Client {
     this._TCPclient.write(Packets.Hello.create({ id: UUID, key: password }))
   }
 
-  on (evt, func) {
-    this._eventEmitter.on(evt, func.bind(this))
+  close () {
+    this._TCPclient.destroy()
+    this._UDPclient.close()
   }
 }
 

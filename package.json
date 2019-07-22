@@ -1,0 +1,31 @@
+{
+  "name": "rattata",
+  "version": "0.0.2",
+  "description": "A remote administration tool, or a remote access trojan - up to you :)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/featherbear/UNSW-COMP6441-RATtata.git"
+  },
+  "author": "featherbear",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/featherbear/UNSW-COMP6441-RATtata/issues"
+  },
+  "homepage": "https://github.com/featherbear/UNSW-COMP6441-RATtata#readme",
+  "dependencies": {
+    "int24": "0.0.1",
+    "iohook": "^0.5.1",
+    "node-machine-id": "^1.1.12",
+    "pkg": "^4.4.0",
+    "screenshot-node": "^1.2.1",
+    "systeminformation": "^4.14.4",
+    "tmp": "^0.1.0"
+  }
+}

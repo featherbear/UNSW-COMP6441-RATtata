@@ -1,18 +1,74 @@
 <template>
   <div class="TabContainer">
+    <!-- I'm dumb
+    https://vuejs.org/v2/guide/components-dynamic-async.html
+    -->
     <section name="about" class="active">
-      <!-- <div class="wrapper"> -->
       <About></About>
-      <!-- </div> -->
     </section>
     <section name="connect">
-      <!-- <div class="wrapper"> -->
       <Connect></Connect>
-      <!-- </div> -->
     </section>
-    <section name="settings"></section>
+    <section name="settings">
+      <!-- data-simplebar -->
+      <Settings></Settings>
+    </section>
+
+    <section v-for="id in connectionList" :key="id" :name="'conn-' + id">
+      <ClientConnection :iden="id"></ClientConnection>
+    </section>
   </div>
 </template>
+
+
+<script>
+import { mapState } from "vuex";
+
+import About from "../pages/About";
+import Connect from "../pages/Connect";
+import Settings from "../pages/Settings";
+import ClientConnection from "../pages/ClientConnection";
+
+export default {
+  components: {
+    About,
+    Connect,
+    Settings,
+    ClientConnection
+  },
+
+  computed: mapState({
+    currentPage: state => state.Window.currentPage,
+    servers: state => state.Connections.servers,
+    connectionList: state => state.Connections.connectionList
+  }),
+  watch: {
+    currentPage: function(newVal, oldVal) {
+      this.show(newVal);
+    }
+  },
+  methods: {
+    show(page) {
+      let newElement = this.$el.querySelector(`[name=${page}]`);
+
+      if (!newElement) {
+        return;
+      }
+
+      let currentElement = this.$el.querySelector(".active");
+
+      if (currentElement == newElement) return;
+
+      currentElement && currentElement.classList.remove("active");
+      newElement.classList.add("active");
+    }
+  },
+  mounted() {
+    this.show(this.$store.state.Window.currentPage);
+  }
+};
+</script>
+
 
 
 <style scoped>
@@ -32,56 +88,17 @@ section {
 
   height: 100%;
   width: 100%;
+
+  overflow-y: auto;
 }
 
 section.active {
-  z-index: 100;
+  z-index: 1;
 }
 
-.wrapper {
-  background-color: white;
-  height: 100%;
+section[name="connect"] {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 </style>
 
-
-
-<script>
-import About from "../pages/About";
-import Connect from "../pages/Connect";
-// import Settings from "../pages/Settings";
-
-export default {
-  components: {
-    About,
-    Connect
-    // Settings
-  },
-  props: ["currentTab"],
-  watch: {
-    currentTab: function(newVal, oldVal) {
-      console.log("TabContainer::currentTab");
-
-      this.show(newVal, oldVal);
-    }
-  },
-  methods: {
-    show(tabName, oldTabName) {
-      let newElement = this.$el.querySelector(`[name=${tabName}]`);
-
-      if (!newElement) {
-        console.error(`No tab "${tabName}" found`);
-        return;
-      }
-
-      let currentElement = this.$el.querySelector(".active");
-
-      if (currentElement == newElement) return;
-
-      currentElement && currentElement.classList.remove("active");
-      newElement.classList.add("active");
-      console.log(`Switched to ${tabName}`);
-    }
-  }
-};
-</script>

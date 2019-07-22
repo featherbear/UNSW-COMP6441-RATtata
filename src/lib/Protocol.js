@@ -111,13 +111,6 @@ Packets.List = class List extends _Connection {
   }
 }
 
-Packets.Poll = class Poll extends _Connection {
-  constructor () {
-    super(...arguments)
-    this.messabgeType = _MessageType.Poll
-  }
-}
-
 Packets.DisplaySetup = class DisplaySetup extends _Control {
   constructor () {
     super(...arguments)
@@ -188,6 +181,13 @@ Packets.Lock = class Lock extends _Control {
 
 // response
 
+Packets.Poll = class Poll extends _Data {
+  constructor () {
+    super(...arguments)
+    this.messageType = _MessageType.Poll
+  }
+}
+
 Packets.r_Hello = class r_Hello extends _Data {
   constructor () {
     super(...arguments)
@@ -232,8 +232,6 @@ function _identifyPacket (rawPacket) {
           return Packets.Hello
         case _MessageType.List:
           return Packets.List
-        case _MessageType.Poll:
-          return Packets.Poll
       }
       break
     case _PacketType.Control:
@@ -260,6 +258,8 @@ function _identifyPacket (rawPacket) {
       break
     case _PacketType.Data:
       switch (rawPacket.messageType) {
+        case _MessageType.Poll:
+          return Packets.Poll
         case _MessageType.r_Hello:
           return Packets.r_Hello
         case _MessageType.r_List:
