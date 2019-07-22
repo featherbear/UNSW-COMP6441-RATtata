@@ -69,20 +69,11 @@ const mutations = {
   },
 
   updateData (state, { serverID, ...data }) {
-    console.log('DATA UPDATE')
     if (state.servers[serverID]) {
-      console.log('APPLY')
       state.servers[serverID].data = {
         ...state.servers[serverID].data,
         ...data
       }
-
-      // Object.assign(
-      //   state.servers[serverID].data,
-      //   data
-      // )
-
-      console.log(state.servers[serverID].data)
     }
   },
 
@@ -96,6 +87,10 @@ const mutations = {
     }
 
     state.servers[serverID].address = address
+  },
+
+  tickUptime (state, { serverID }) {
+    state.servers[serverID].data.uptime++
   }
 }
 
@@ -115,6 +110,10 @@ const actions = {
 
   removeServer ({ commit }, dataObject) {
     commit('removeServer', dataObject)
+  },
+
+  tickUptime ({ commit }, dataObject) {
+    commit('tickUptime', dataObject)
   }
 }
 
