@@ -18,7 +18,7 @@ class PayloadUtils {
 
   write (packet, ...args) {
     // console.debug('<SEND<', packet)
-    let payload = Buffer.from(packet.toString())
+    const payload = Buffer.from(packet.toString())
 
     if (payload.length > 4294967296) {
       throw Error('Payload too large')
@@ -31,7 +31,7 @@ class PayloadUtils {
     if (payload.length >= 16777216 /* Math.pow(2,3*8) */) {
       payloadSize.fill(0)
 
-      let extendedPayloadSize = Buffer.allocUnsafe(4)
+      const extendedPayloadSize = Buffer.allocUnsafe(4)
       extendedPayloadSize.writeUInt32LE(payload.length)
 
       payloadSize = Buffer.concat([payloadSize, extendedPayloadSize])
@@ -52,13 +52,13 @@ class PayloadUtils {
         let payloadLength = int24.readUInt24LE(data, 0)
         let clearOffset = 3
 
-        if (payloadLength == 0) {
+        if (payloadLength === 0) {
           if (this._buffer.length - 3 < 4) break
 
           payloadLength = data.readUInt32LE(3)
           clearOffset += 4
 
-          if (payloadLength == 0) {
+          if (payloadLength === 0) {
             this._buffer = this._buffer.slice(clearOffset)
             continue
           }
@@ -72,7 +72,7 @@ class PayloadUtils {
 
       if (this._isProcessingPacket) {
         if (this._buffer.length >= this._payloadSize) {
-          let payload = this._buffer.slice(0, this._payloadSize)
+          const payload = this._buffer.slice(0, this._payloadSize)
           this._buffer = this._buffer.slice(this._payloadSize)
           this._payloadSize = 0
           this._isProcessingPacket = false

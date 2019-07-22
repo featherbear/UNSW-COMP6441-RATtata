@@ -1,8 +1,8 @@
 {
-  "name": "my-project",
+  "name": "client-gui",
   "version": "0.0.1",
   "author": "Andrew Wong <andrew.j.wong@outlook.com>",
-  "description": "An electron-vue project",
+  "description": "RATtata Client",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -17,8 +17,8 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "my-project",
-    "appId": "com.example.yourapp",
+    "productName": "client-gui",
+    "appId": "org.rattata",
     "directories": {
       "output": "build"
     },
@@ -51,10 +51,16 @@
     }
   },
   "dependencies": {
-    "vue": "^2.5.16",
+    "@mdi/font": "^3.8.95",
     "axios": "^0.18.0",
+    "buefy": "^0.7.10",
+    "bulma": "^0.7.5",
+    "bulma-divider": "^0.2.0",
+    "simplebar": "^4.1.0",
+    "vue": "^2.5.16",
     "vue-electron": "^1.0.6",
-    "vue-router": "^3.0.1"
+    "vuex": "^3.1.1",
+    "vuex-electron": "^1.0.3"
   },
   "devDependencies": {
     "ajv": "^6.5.0",
@@ -73,24 +79,24 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^2.0.4",
+    "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
-    "electron-builder": "^20.19.2",
-    "mini-css-extract-plugin": "0.4.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "0.4.0",
     "multispinner": "^0.2.1",
     "node-loader": "^0.6.0",
-    "node-sass": "^4.9.2",
-    "sass-loader": "^7.0.3",
+    "node-sass": "^4.12.0",
+    "sass-loader": "^7.1.0",
     "style-loader": "^0.21.0",
     "url-loader": "^1.0.1",
     "vue-html-loader": "^1.2.4",
     "vue-loader": "^15.2.4",
     "vue-style-loader": "^4.1.0",
     "vue-template-compiler": "^2.5.16",
-    "webpack-cli": "^3.0.8",
     "webpack": "^4.15.1",
+    "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4",
     "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.3"

