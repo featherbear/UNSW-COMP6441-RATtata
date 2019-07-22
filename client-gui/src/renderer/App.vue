@@ -22,6 +22,10 @@ import TabContainer from "./components/TabContainer";
 window.RATtata = {
   connections: {
     
+  },
+  
+  callbackEvents: {
+    
   }
 }
 
