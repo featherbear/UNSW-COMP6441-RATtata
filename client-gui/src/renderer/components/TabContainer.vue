@@ -65,21 +65,6 @@ export default {
   },
   mounted() {
     this.show(this.$store.state.Window.currentPage);
-  },
-  data() {
-    return {
-      connectionData: {
-        connection: {
-          lanIPs: ["192.168.1.1"],
-          wanIPs: ["192.168.1.1"]
-        },
-        system: {
-          memoryCurrent: 1207,
-          memoryMax: 8096,
-          CPU: 50
-        }
-      }
-    };
   }
 };
 </script>

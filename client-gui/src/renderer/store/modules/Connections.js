@@ -1,56 +1,66 @@
 const state = {
   servers: {
-    123456: {
-      id: '123456',
+    'demo-123456': {
+      id: 'demo-123456',
       name: 'Paperweight',
       address: '127.0.0.1',
       os: 'mac',
-      data: {}
+      data: {
+        platform: 'darwin',
+        hostname: 'Paperweight',
+        logofile: 'mac',
+        uptime: 11200,
+        hasDisplay: false,
+        lanIPs: ['10.185.193.58'],
+        memoryPercentage: '66',
+        memoryUsed: '41.1',
+        memoryTotal: '62.7',
+        memorySuffix: 'GB',
+        cpu_load: '3'
+      }
     },
-    234567: {
-      id: '234567',
+    'demo-234567': {
+      id: 'demo-234567',
       name: 'Blue Screen',
       address: '127.0.0.1',
       os: 'windows',
-      data: {}
-      //   platform: 'win32',
-      //   distro: 'winXTREME',
-      //   kernel: 'note sure',
-      //   hostname: 'localHOST',
-      //   logofile: 'logx',
-
-      //   hasDisplay: true,
-      //   lanIPs: ['127.0.0.1', '192.168.123.1'],
-      //   memoryPercentage: 1,
-      //   memoryUsed: 1,
-      //   memoryTotal: 100,
-      //   memorySuffix: 'TB',
-      //   cpu_load: 30
-      // }
+      data: {
+        platform: 'win32',
+        distro: 'Microsoft Windows 10 Pro',
+        kernel: '10.0.17134',
+        hostname: 'BlueScreen',
+        logofile: 'windows',
+        uptime: 29146,
+        hasDisplay: true,
+        lanIPs: ['192.168.2.3', '192.168.128.51'],
+        memoryPercentage: '29',
+        memoryUsed: '1.1',
+        memoryTotal: '3.8',
+        memorySuffix: 'GB',
+        cpu_load: '14'
+      }
     },
-    345678: {
-      id: '345678',
+    'demo-345678': {
+      id: 'demo-345678',
       name: 'rm -rf /',
       address: '127.0.0.1',
       os: 'linux',
       data: {
-        platform: String,
-        distro: String,
-        kernel: String,
-        hostname: String,
-        logofile: String,
-
-        hasDisplay: Boolean,
-        lanIPs: Array[String],
-        memoryPercentage: Number,
-        memoryUsed: Number,
-        memoryTotal: Number,
-        memorySuffix: String,
-        cpu_load: Number
+        platform: 'linux',
+        hostname: 'linuxbox',
+        logofile: 'linux',
+        uptime: 7384601,
+        hasDisplay: true,
+        lanIPs: ['10.248.123.122'],
+        memoryPercentage: '20',
+        memoryUsed: '4',
+        memoryTotal: '19.8',
+        memorySuffix: 'GB',
+        cpu_load: '14'
       }
     }
   },
-  connectionList: [123456, 234567, 345678]
+  connectionList: ['demo-123456', 'demo-234567', 'demo-345678']
 }
 
 const mutations = {

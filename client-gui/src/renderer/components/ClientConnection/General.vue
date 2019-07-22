@@ -46,6 +46,7 @@ export default {
 
   computed: {
     clientConnected() {
+      if (this.iden.toString().startsWith("demo-")) return true;
       return window.RATtata.connections[this.iden];
     },
     data() {
