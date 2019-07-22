@@ -2,14 +2,40 @@
   <div class="container">
     <div class="connectForm">
       <b-field grouped>
-        <b-input placeholder="Server address" icon="earth" v-model.trim="address" @keyup.native.enter="connect" expanded></b-input>
+        <b-input
+          placeholder="Server address"
+          icon="earth"
+          v-model.trim="address"
+          @keyup.native.enter="connect(address)"
+          expanded
+        ></b-input>
         <p class="control">
-          <button class="button is-primary" @click="connect">Connect</button>
+          <b-button type="is-primary" @click="connect(address)">Connect</b-button>
         </p>
       </b-field>
     </div>
     <b-divider label="PAST CONNECTIONS"></b-divider>
-    <b-table :data="data" :columns="columns" hoverable></b-table>
+    <b-table :data="data" hoverable>
+      <template slot-scope="props">
+        <b-table-column width="125">
+          <b-button
+            icon-left="power-plug"
+            type="is-primary"
+            outlined
+            @click="connect(props.row.address)"
+          >Connect</b-button>
+        </b-table-column>
+        <b-table-column field="address" label="Address" sortable>{{ props.row.address }}</b-table-column>
+
+        <b-table-column
+          field="last_connected"
+          label="Last Connected"
+          sortable
+          centered
+        >{{ props.row.last_connected }}</b-table-column>
+        <!-- ? new Date(props.row.last_connected).toLocaleDateString() : '' -->
+      </template>
+    </b-table>
   </div>
 </template>
 
@@ -21,18 +47,21 @@ export default {
     "b-divider": Divider
   },
   methods: {
-    connect() {
-      let address = this.address;
-
+    sanitize(s) {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/"/g, "&quot;");
+    },
+    connect(address) {
       let { spawnClient } = require("../components/_RATtataClient");
 
-      let [host, port] = this.address.split(":");
-
       // TODO: validate address
-
+      let [host, port] = address.split(":");
       port = parseInt(port || 41233);
+
       this.$snackbar.open({
-        message: `Connecting to ${escape(address)}...`,
+        message: `Connecting to ${this.sanitize(address)}...`,
         type: "is-primary"
       });
 
@@ -75,27 +104,19 @@ export default {
       });
 
       client.on("connect", () => {
-        console.log("Connected!");
+        this.$store.dispatch("addServer", {
+          serverID: client.__serverID,
+          address
+        });
 
-        console.log("DISPATCH");
-        try {
-          this.$store.dispatch("addServer", {
-            serverID: client.__serverID,
-            address
-          });
-        } catch (e) {
-          console.log(e);
-        }
-        console.log("DOMNE");
+        this.$store.dispatch("tickUptime", {
+          serverID: client.__serverID
+        });
 
-        console.log("D2");
         this.$store.dispatch("changePage", `conn-${client.__serverID}`);
-        console.log("DONE");
-        //stackoverflow 42133894
       });
 
       client.on("poll", pollData => {
-        console.log("Update poll data", pollData);
         this.$store.dispatch("updateData", {
           serverID: client.__serverID,
           ...pollData
@@ -105,8 +126,11 @@ export default {
       client.on("serverID", id => {
         client.__serverID = id;
 
-        console.log(client.__serverID);
-
+        if (window.RATtata.connections[id]) {
+          console.log("ALREADY OPEN");
+          return;
+        }
+        
         window.RATtata.connections[id] = {
           client
         };
@@ -119,7 +143,7 @@ export default {
           },
           confirmText: "Connect",
           hasIcon: true,
-          title: `Connecting to ${escape(address)}...`,
+          title: `Connecting to server...`,
           icon: "lock",
           iconPack: "mdi",
           onConfirm: password => {
@@ -134,19 +158,19 @@ export default {
       address: "",
       data: [
         {
-          address: "blackbox.proxy-local:44132",
+          address: "blackbox.proxy-local:13191",
           last_connected: "2019-07-21 19:43:27"
         },
         {
-          address: "sandbox:44132",
+          address: "sandbox:44213",
           last_connected: "2019-07-20 02:12:10"
         },
         {
-          address: "127.0.0.1:44133",
+          address: "127.0.0.1:41233",
           last_connected: "2019-07-20 02:12:08"
         },
         {
-          address: "deathstar:44132",
+          address: "deathstar:41233",
           last_connected: "2019-07-19 12:16:01"
         }
       ],
