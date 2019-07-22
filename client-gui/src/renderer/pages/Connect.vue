@@ -130,6 +130,13 @@ export default {
         });
       });
 
+      client.on("display", imageBuffer => {
+        let callbackEvents = window.RATtata.callbackEvents[client.__serverID];
+        if (callbackEvents && callbackEvents.display) {
+          callbackEvents.display(imageBuffer);
+        }
+      });
+
       client.on("serverID", id => {
         client.__serverID = id;
 

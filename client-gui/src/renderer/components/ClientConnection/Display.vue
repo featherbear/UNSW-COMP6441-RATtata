@@ -29,7 +29,6 @@ export default {
     window.RATtata.callbackEvents[this.iden] = {
       ...(window.RATtata.callbackEvents[this.iden] || {}),
       display: (imageBuffer) => {
-        console.log(this, imageBuffer);
         this.imageData = "data:image/png;base64," + imageBuffer.toString('base64')
       }
     };
