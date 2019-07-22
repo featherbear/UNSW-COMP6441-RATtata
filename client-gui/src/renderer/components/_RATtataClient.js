@@ -1,16 +1,14 @@
 const Client = require('../../../../src/Client')
 const { Packets } = require('../../../../src/lib/Protocol')
 
-function spawnClient (host, port, password) {
-
-
+function spawnClient (host, port) {
   console.log('Connecting to', host, port)
   var client = new Client()
 
   client.connect(
     port,
     host,
-    password,
+    null,
     function () {
       this.emit('connect')
 
