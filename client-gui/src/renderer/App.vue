@@ -22,6 +22,10 @@ import TabContainer from "./components/TabContainer";
 window.RATtata = {
   connections: {
     
+  },
+  
+  callbackEvents: {
+    
   }
 }
 
@@ -42,4 +46,9 @@ html {
 .MenuBarContainer {
   max-width: 250px;
 }
+
+.dialog.modal .media {
+  width: 100%;
+}
+
 </style>

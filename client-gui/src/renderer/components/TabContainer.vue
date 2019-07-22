@@ -1,5 +1,8 @@
 <template>
   <div class="TabContainer">
+    <!-- I'm dumb
+    https://vuejs.org/v2/guide/components-dynamic-async.html
+    -->
     <section name="about" class="active">
       <About></About>
     </section>
@@ -11,8 +14,8 @@
       <Settings></Settings>
     </section>
 
-    <section v-for="conn in connections" :key="conn.id" :name="'conn-' + conn.id">
-      <ClientConnection :iden="conn.id"></ClientConnection>
+    <section v-for="id in connectionList" :key="id" :name="'conn-' + id">
+      <ClientConnection :iden="id"></ClientConnection>
     </section>
   </div>
 </template>
@@ -36,7 +39,8 @@ export default {
 
   computed: mapState({
     currentPage: state => state.Window.currentPage,
-    connections: state => state.Connections.connections
+    servers: state => state.Connections.servers,
+    connectionList: state => state.Connections.connectionList
   }),
   watch: {
     currentPage: function(newVal, oldVal) {
@@ -61,21 +65,6 @@ export default {
   },
   mounted() {
     this.show(this.$store.state.Window.currentPage);
-  },
-  data() {
-    return {
-      connectionData: {
-        connection: {
-          lanIPs: ["192.168.1.1"],
-          wanIPs: ["192.168.1.1"]
-        },
-        system: {
-          memoryCurrent: 1207,
-          memoryMax: 8096,
-          CPU: 50
-        }
-      }
-    };
   }
 };
 </script>
@@ -107,7 +96,7 @@ section.active {
   z-index: 1;
 }
 
-section[name=connect] {
+section[name="connect"] {
   padding-left: 10px;
   padding-right: 10px;
 }

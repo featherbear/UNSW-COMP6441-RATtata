@@ -25,6 +25,10 @@ class Client extends EventEmitter {
     })
   }
 
+  isConnected () {
+    return this.__isAuthenticated__
+  }
+
   _onPayload (payload) {
     function parseRawData (payload) {
       let rawPacket
@@ -109,6 +113,11 @@ class Client extends EventEmitter {
   login (password) {
     if (this.__isAuthenticated__) return
     this._TCPclient.write(Packets.Hello.create({ id: UUID, key: password }))
+  }
+
+  close () {
+    this._TCPclient.destroy()
+    this._UDPclient.close()
   }
 }
 

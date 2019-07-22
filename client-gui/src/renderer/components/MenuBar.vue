@@ -22,14 +22,14 @@
         </b-menu-item>-->
       </b-menu-list>
 
-      <b-menu-list label="Connections" v-if="Object.keys(connections).length">
+      <b-menu-list label="Connections" v-if="Object.keys(connectionList).length">
         <!-- <b-menu-item v-if="!Object.keys(connections).length" label="..." disabled></b-menu-item> -->
         <b-menu-item
-          v-for="conn in connections"
-          :key="conn.id"
-          :icon="osToIcon(conn.os)"
-          :label="conn.name"
-          :to="'conn-' + conn.id"
+          v-for="id in connectionList"
+          :key="id"
+          :icon="osToIcon(servers[id].os || servers[id].data.platform || servers[id].data.logofile)"
+          :label="servers[id].name || servers[id].data.hostname"
+          :to="'conn-' + id"
           @click="evtHandler"
         ></b-menu-item>
       </b-menu-list>
@@ -39,12 +39,13 @@
 
 <script>
 import { mapState } from "vuex";
-import {osToIcon} from "./_iconUtils";
+import { osToIcon } from "./_iconUtils";
 
 export default {
   computed: mapState({
     currentPage: state => state.Window.currentPage,
-    connections: state => state.Connections.connections
+    servers: state => state.Connections.servers,
+    connectionList: state => state.Connections.connectionList
   }),
   watch: {
     currentPage(newVal, oldVal) {
