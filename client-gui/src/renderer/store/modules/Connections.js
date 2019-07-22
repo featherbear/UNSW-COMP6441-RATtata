@@ -91,8 +91,9 @@ const mutations = {
     if (!state.servers[serverID]) {
       state.servers[serverID] = {
         id: serverID,
-        name: '...',
-        data: {}
+        name: '',
+        data: {},
+        keylog: ''
       }
     }
 
@@ -101,6 +102,10 @@ const mutations = {
 
   tickUptime (state, { serverID }) {
     state.servers[serverID].data.uptime++
+  },
+
+  addKeylog (state, { serverID, data }) {
+    state.servers[serverID].keylog += data
   }
 }
 
@@ -124,6 +129,10 @@ const actions = {
 
   tickUptime ({ commit }, dataObject) {
     commit('tickUptime', dataObject)
+  },
+
+  addKeylog ({ commit }, dataObject) {
+    commit('addKeylog', dataObject)
   }
 }
 

