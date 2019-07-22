@@ -48,7 +48,7 @@ export default {
   },
   computed: {
     data() {
-      return this.$store.state.Connections.connections[this.iden];
+      return this.$store.state.Connections.servers[this.iden];
     }
   }
 };

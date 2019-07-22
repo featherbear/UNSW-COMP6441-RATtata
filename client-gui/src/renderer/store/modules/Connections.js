@@ -1,5 +1,5 @@
 const state = {
-  connections: {
+  servers: {
     123456: {
       id: '123456',
       name: 'Paperweight',
@@ -49,15 +49,73 @@ const state = {
         cpu_load: Number
       }
     }
-  }
+  },
+  connectionList: [123456, 234567, 345678]
 }
 
 const mutations = {
+  addServer (state, { serverID }) {
+    if (state.connectionList.indexOf(serverID) === -1) {
+      state.connectionList = [...state.connectionList, serverID]
+    }
+  },
 
+  removeServer (state, { serverID }) {
+    state.connectionList = state.connectionList.filter(e => e !== serverID)
+  },
+
+  updateName (state, { serverID, name }) {
+    if (state.servers[serverID]) state.servers[serverID].name = name
+  },
+
+  updateData (state, { serverID, ...data }) {
+    console.log('DATA UPDATE')
+    if (state.servers[serverID]) {
+      console.log('APPLY')
+      state.servers[serverID].data = {
+        ...state.servers[serverID].data,
+        ...data
+      }
+
+      // Object.assign(
+      //   state.servers[serverID].data,
+      //   data
+      // )
+
+      console.log(state.servers[serverID].data)
+    }
+  },
+
+  initServer (state, { serverID, address }) {
+    if (!state.servers[serverID]) {
+      state.servers[serverID] = {
+        id: serverID,
+        name: '...',
+        data: {}
+      }
+    }
+
+    state.servers[serverID].address = address
+  }
 }
 
 const actions = {
+  addServer ({ commit }, dataObject) {
+    commit('initServer', dataObject)
+    commit('addServer', dataObject)
+  },
 
+  updateName ({ commit }, dataObject) {
+    commit('updateName', dataObject)
+  },
+
+  updateData ({ commit }, dataObject) {
+    commit('updateData', dataObject)
+  },
+
+  removeServer ({ commit }, dataObject) {
+    commit('removeServer', dataObject)
+  }
 }
 
 export default {
