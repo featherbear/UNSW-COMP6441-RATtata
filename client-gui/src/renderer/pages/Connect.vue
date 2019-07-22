@@ -24,89 +24,108 @@ export default {
     connect() {
       let address = this.address;
 
-      this.$dialog.prompt({
-        inputAttrs: {
-          type: "password",
-          placeholder: "Enter server password"
-        },
-        confirmText: "Connect",
-        hasIcon: true,
-        title: `Connecting to server...`,
-        icon: "lock",
-        iconPack: "mdi",
-        onConfirm: password => {
-          // TODO: Refactor
+      let { spawnClient } = require("../components/_RATtataClient");
 
-          let { spawnClient } = require("../components/_RATtataClient");
+      let [host, port] = this.address.split(":");
 
-          let [host, port] = this.address.split(":");
-          port = parseInt(port);
+      // TODO: validate address
 
-          let client = spawnClient(host, port, password);
-          client.on("serverID", id => {
-            client.__serverID = id;
-            window.RATtata.connections[id] = {
-              client
-            };
+      port = parseInt(port || 41233);
+      this.$snackbar.open({
+        message: `Connecting to ${escape(address)}...`,
+        type: "is-primary"
+      });
+
+      let client;
+      try {
+        client = spawnClient(host, port);
+      } catch (e) {
+        this.$dialog.alert({
+          title: "Error",
+          message: e
+        });
+        return;
+      }
+
+      client.on("badAuth", remainingTries => {
+        if (!remainingTries) {
+          this.$dialog.alert({
+            title: "Server disconnected",
+            message: "You were kicked for too many authentication failures"
           });
-
-          client.on("connect", () => {
-            console.log("Connected!");
-            // TODO: Vuex
-
-//stackoverflow 42133894
-            // this.$store.state.Connections.connections = {
-            //   ...this.$store.state.Connections.connections,
-            //   [client.__serverID]: {
-            //     id: client.__serverID,
-            //     name: "...",
-            //     address: this.address,
-            //     data: {}
-            //   }
-            // };
-
-            this.$store.state.Connections.connections[client.__serverID] = {
-              id: client.__serverID,
-              name: "...",
-              address: this.address,
-              data: {}
-            };
-          });
-
-          client.on("poll", pollData => {
-            Object.apply(
-              this.$store.state.Connections.connections[client.__serverID],
-              pollData
-            );
-          });
-
-          client.on("badAuth", remainingTries => {
-            if (!remainingTries) {
-              this.$dialog.alert({
-                title: "Server disconnected",
-                message: "You were kicked for too many authentication failures"
-              });
-              return;
-            }
-
-            this.$dialog.prompt({
-              inputAttrs: {
-                type: "password",
-                placeholder: "Enter server password"
-              },
-              message: `Remaining attempts: ${remainingTries}`,
-              confirmText: "Connect",
-              hasIcon: true,
-              title: `Incorrect password`,
-              icon: "lock",
-              iconPack: "mdi",
-
-              onConfirm: password => {
-                client.login(password);
-              }
-            });
-          });
+          return;
         }
+
+        this.$dialog.prompt({
+          inputAttrs: {
+            type: "password",
+            placeholder: "Enter server password"
+          },
+          message: `Remaining attempts: ${remainingTries}`,
+          confirmText: "Connect",
+          hasIcon: true,
+          title: `Incorrect password`,
+          icon: "lock",
+          iconPack: "mdi",
+
+          onConfirm: password => {
+            client.login(password);
+          }
+        });
+      });
+
+      client.on("connect", () => {
+        console.log("Connected!");
+
+        console.log("DISPATCH");
+        try {
+          this.$store.dispatch("addServer", {
+            serverID: client.__serverID,
+            address
+          });
+        } catch (e) {
+          console.log(e);
+        }
+        console.log("DOMNE");
+
+        console.log("D2");
+        this.$store.dispatch("changePage", `conn-${client.__serverID}`);
+        console.log("DONE");
+        //stackoverflow 42133894
+      });
+
+      client.on("poll", pollData => {
+        console.log("Update poll data", pollData);
+        this.$store.dispatch("updateData", {
+          serverID: client.__serverID,
+          ...pollData
+        });
+      });
+
+      client.on("serverID", id => {
+        client.__serverID = id;
+
+        console.log(client.__serverID);
+
+        window.RATtata.connections[id] = {
+          client
+        };
+
+        // now ask for auth
+        this.$dialog.prompt({
+          inputAttrs: {
+            type: "password",
+            placeholder: "Enter server password"
+          },
+          confirmText: "Connect",
+          hasIcon: true,
+          title: `Connecting to ${escape(address)}...`,
+          icon: "lock",
+          iconPack: "mdi",
+          onConfirm: password => {
+            client.login(password);
+          }
+        });
       });
     }
   },
