@@ -42,4 +42,9 @@ html {
 .MenuBarContainer {
   max-width: 250px;
 }
+
+.dialog.modal .media {
+  width: 100%;
+}
+
 </style>

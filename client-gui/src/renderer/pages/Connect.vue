@@ -2,7 +2,7 @@
   <div class="container">
     <div class="connectForm">
       <b-field grouped>
-        <b-input placeholder="Server address" icon="earth" v-model.trim="address" expanded></b-input>
+        <b-input placeholder="Server address" icon="earth" v-model.trim="address" @keyup.native.enter="connect" expanded></b-input>
         <p class="control">
           <button class="button is-primary" @click="connect">Connect</button>
         </p>
