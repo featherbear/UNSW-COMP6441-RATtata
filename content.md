@@ -26,7 +26,6 @@ _Soo... I built a RAT..._
 ![](assets/deee9e1b-e304-45c6-8ef3-558d700b010c.png)
 
 
-
 <!-- .slide: data-background-video="assets/videos/video.mp4" data-background-size="contain" -->
 
 
@@ -63,4 +62,9 @@ _Soo... I built a RAT..._
 |Virus Reserach|&#x2714;&#xFE0F;|
 
 
-Blog: [Project RATtata](https://featherbear.github.io/UNSW-COMP6441/blog/project-RATtata)
+
+# Project <u>RAT</u>tata
+
+![](assets/logos/rattata.png)
+Blog: [Project RATtata](https://featherbear.github.io/UNSW-COMP6441/blog/post/job-application/something_awesome/)  
+GitHub: featherbear/[UNSW-COMP6441-RATtata](https://github.com/featherbear/UNSW-COMP6441-RATtata)
