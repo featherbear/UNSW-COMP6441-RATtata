@@ -29,7 +29,6 @@ _Soo... I built a RAT..._
 <!-- .slide: data-background-video="assets/videos/video.mp4" data-background-size="contain" -->
 
 
-
 # Technologies
 
 |Node.js|Electron|Vue|
@@ -60,6 +59,20 @@ _Soo... I built a RAT..._
 |Web Camera Capture|&#x274C;|
 |Secure Communication|&#x274C;|
 |Virus Reserach|&#x2714;&#xFE0F;|
+
+
+
+# Future
+ 
+```javascript data-line-numbers
+this.improve();
+```
+
+* Write the Relay
+* Secure the network traffic
+* Rewrite the server in a a more lower-level language
+* More features...
+* Dark theme (important) <!-- .element: class="fragment" data-fragment-index="1" -->
 
 
 
