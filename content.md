@@ -49,22 +49,40 @@ _Soo... I built a RAT..._
 
 
 ## Additional Features
+
 |||
 |:--|:--:|
-|Keystroke Logging|&#x2714;&#xFE0F;|
-|Electron GUI|&#x2714;&#xFE0F;|
-|Display Streaming|&#x2714;&#xFE0F;|
-|Cross Compatability|&#x2714;&#xFE0F;|
 |Password Authentication|&#x2714;&#xFE0F;|
+|Display Streaming|&#x2714;&#xFE0F;|
+|Keystroke Logging|&#x2714;&#xFE0F;|
+|OS Cross Compatibility|&#x2714;&#xFE0F;|
+|Electron GUI|&#x2714;&#xFE0F;|
 |Web Camera Capture|&#x274C;|
 |Secure Communication|&#x274C;|
 |Virus Reserach|&#x2714;&#xFE0F;|
 
 
 
+
+# What went wrong
+
+* NAT Holepunching (Relay server)
+* Bugs.
+
+
+
+# What went well
+
+* It works (_on my machine&#8482;_)
+* Learnt about viruses and malware behaviour
+* Wrote an application layer communication protocol
+* Electron & Vue.js
+
+
+
 # Future
  
-```javascript data-line-numbers
+```javascript
 this.improve();
 ```
 
