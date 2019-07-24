@@ -69,8 +69,8 @@ this.improve();
 ```
 
 * Write the Relay
+* Rewrite the server with a more lower-level language
 * Secure the network traffic
-* Rewrite the server in a a more lower-level language
 * More features...
 * Dark theme (important) <!-- .element: class="fragment" data-fragment-index="1" -->
 
